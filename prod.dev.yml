@@ -1,0 +1,26 @@
+version: '3.7'
+
+x-variables: &variables
+  ENV_STAGE: dev
+  DEBUG: 1
+  USE_HTTPS: 0
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/prod/nginx/Dockerfile
+    ports:
+      - 9000:9000
+  monitoring:
+    environment:
+      <<: *variables
+      SWAGGER_URL: http://localhost:9000
+  celery:
+    command: celery -A src worker -l info -Q celery
+    environment:
+      <<: *variables
+
+networks:
+  microservice_network:
+    name: dev_microservice_network

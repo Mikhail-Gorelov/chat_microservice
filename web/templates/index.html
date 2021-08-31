@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static main %}
+{% load i18n %}
+{% block active_index %}class="active"{% endblock active_index %}
+{% block title %}Main Page{% endblock title%}
+{% block head %}{% endblock head %}
+
+{% block header %}
+{% include 'includes/header.html'  with selected='index' %}
+{% endblock header %}
+
+{% block container %}
+<div class="jumbotron">
+  <p class="lead">{% trans 'Chat ' %}</p>
+  <input type="text" name="username" id="username">
+  <p><button class="btn btn-default" href="{% url 'chat:index' %}" id="chatButton">{% trans 'Connect to chat' %} &raquo;</button></p>
+</div>
+
+{% endblock container %}
+
+{% block jquery %}
+$.getScript('{% static 'chat/js/chat.js' %}');
+{% endblock jquery %}

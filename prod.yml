@@ -1,0 +1,126 @@
+version: '3.7'
+
+services:
+  nginx:
+    image: bandirom/django-template-nginx:0.1
+    volumes:
+      - static_volume:/home/ubuntu/web/static
+      - media_volume:/home/ubuntu/web/media
+      - ./logs/nginx:/var/log/nginx:delegated
+      - gunicorn_socket:/gunicorn_socket
+    depends_on:
+      - web
+    restart: always
+    healthcheck:
+      test: service nginx status || exit 1
+      interval: 20s
+      timeout: 3s
+      retries: 3
+    networks:
+      - microservice_network
+    extra_hosts:
+      - "docker-gateway-host:172.17.0.1"
+  monitoring:
+    build:
+      context: .
+      dockerfile: docker/prod/web/Dockerfile
+    image: bandirom/django-template:0.1
+    entrypoint: /entrypoint.sh
+    volumes:
+      - static_volume:/home/ubuntu/web/static
+      - media_volume:/home/ubuntu/web/media
+      - redis_socket:/redis_socket
+      - gunicorn_socket:/gunicorn_socket
+      - postgres_socket:/postgres_socket
+      - ./logs/django:/home/ubuntu/web/logs:delegated
+    expose:
+      - 8000
+    environment:
+      - USE_HTTPS=0
+    env_file:
+      - docker/prod/env/.env
+      - docker/prod/env/.db.env
+      - docker/prod/env/.gunicorn.env
+      - docker/prod/env/.data.env
+    depends_on:
+      - db
+      - redis
+    restart: always
+    networks:
+      - microservice_network
+      - separated_network
+    healthcheck:
+      test: curl --fail -s http://localhost:8000$$HEALTH_CHECK_URL || exit 1
+      interval: 1m30s
+      timeout: 3s
+      retries: 3
+    extra_hosts:
+      - "docker-gateway-host:172.17.0.1"
+  celery:
+    build:
+      context: .
+      dockerfile: docker/prod/web/Dockerfile
+    image: bandirom/django-template:0.1
+    command: celery -A src worker -l info -Q celery
+    env_file:
+      - docker/prod/env/.env
+      - docker/prod/env/.db.env
+      - docker/prod/env/.data.env
+    depends_on:
+      - redis
+    restart: always
+    volumes:
+      - redis_socket:/redis_socket
+    networks:
+      - separated_network
+    extra_hosts:
+      - "docker-gateway-host:172.17.0.1"
+  db:
+    build:
+      context: .
+      dockerfile: docker/prod/db/Dockerfile
+    image: bandirom/django-template-db:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - postgres_socket:/postgres_socket
+    env_file:
+      - docker/prod/env/.db.env
+    restart: always
+    networks:
+      - separated_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis:
+    build:
+      context: .
+      dockerfile: docker/prod/redis/Dockerfile
+    image: bandirom/django-template-redis:latest
+    restart: always
+    volumes:
+      - redis_data:/data
+      - redis_socket:/redis_socket
+    networks:
+      - separated_network
+    healthcheck:
+      test: [ "CMD", "redis-cli","ping" ]
+      interval: 1m20s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres_data:
+  redis_data:
+  redis_socket:
+  gunicorn_socket:
+  postgres_socket:
+  static_volume:
+  media_volume:
+
+networks:
+  microservice_network:
+    driver: bridge
+  separated_network:
+    driver: bridge
