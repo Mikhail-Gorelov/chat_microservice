@@ -10,8 +10,8 @@
 
 authentification information for user
 
-    SUPERUSER_EMAIL=misha_gorelov@mail.ru
-    SUPERUSER_PASSWORD=HelloWorld1
+    SUPERUSER_EMAIL=test@test.com
+    SUPERUSER_PASSWORD=tester26
 
 #### Run the local develop server:
 
