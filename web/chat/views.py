@@ -10,4 +10,14 @@ from . import serializers
 
 logger = logging.getLogger(__name__)
 
-# Create your views here.
+# from django.shortcuts import render
+#
+#
+# def index(request):
+#     return render(request, 'chat/index.html', {})
+#
+#
+# def username(request, room_name):
+#     return render(request, 'chat/index.html', {
+#         'username': username
+#     })

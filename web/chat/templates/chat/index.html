@@ -8,10 +8,26 @@
     <title>Chat Room</title>
 </head>
 <body>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
-    <input id="chat-message-input" type="text" size="100"><br>
+    <textarea id="chat-log" cols="175" rows="20"></textarea><br>
+    <input id="chat-message-input" type="text" size="175"><br>
     <input id="chat-message-submit" type="button" value="Send">
-    {{ room_name|json_script:"room-name" }}
+    {{ username|json_script:"username" }}
+    <h4>Users in chat:</h4>
+    <div id="usernameList"></div>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th style="width: 36px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Mark</td>
+        </tr>
+      </tbody>
+    </table>
 </body>
 </html>
 {% endblock container %}

@@ -1,15 +1,23 @@
-const roomName = JSON.parse(document.getElementById('room-name').textContent);
-
+const username = localStorage.getItem("username");;
 const chatSocket = new WebSocket(
             'ws://'
             + window.location.host
-            + '/ws/chat/'
+            + '/ws/chat/?username='
+            + username
 );
 
 chatSocket.onmessage = function(e) {
-            console.log(e.data)
+            // console.log(e.data);
             const data = JSON.parse(e.data);
-            document.querySelector('#chat-log').value += (data.message + '\n');
+            console.log(data)
+            if (data.type == "user.connect") {
+              console.log(data.data.username);
+              $("#usernameList").append("<p> " + data.data.username + "</p>")
+            }
+            if (data.type == "fetch.message") {
+              document.querySelector('#chat-log').value += (data.content + '\n');
+            }
+            document.querySelector('#chat-log').value += (data.content + '\n');
 };
 
 chatSocket.onclose = function(e) {
