@@ -17,7 +17,7 @@ chatSocket.onmessage = function(e) {
               document.querySelector('#chat-log').value += (data.author_id + ' says:  ' + data.content + ' at ' + data.date + '\n');
             }
             if (data.command == "new_message") {
-              document.querySelector('#chat-log').value += (data.message + '\n');
+              document.querySelector('#chat-log').value += ("I am saying: " + data.message + '\n');
             }
 };
 
@@ -35,6 +35,7 @@ document.querySelector('#chat-message-input').onkeyup = function(e) {
 document.querySelector('#chat-message-submit').onclick = function(e) {
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
+            console.log(messageInputDom)
             chatSocket.send(JSON.stringify({
                 'command': 'new_message',
                 'message': message
