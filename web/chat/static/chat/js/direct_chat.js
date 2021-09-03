@@ -14,10 +14,10 @@ chatSocket.onmessage = function(e) {
               $("#usernameList").append("<p> " + data.data.username + "</p>")
             }
             if (data.type == "fetch.messages") {
-              document.querySelector('#chat-log').value += (data.author_id + ' says:  ' + data.content + ' at ' + data.date + '\n');
+              $('#chat-log').append(data.author_id + ' says:  ' + data.content + ' at ' + data.date + '\n');
             }
             if (data.command == "new_message") {
-              document.querySelector('#chat-log').value += ("I am saying: " + data.message + '\n');
+              $('#chat-log').append("I am saying: " + data.message + '\n');
             }
 };
 
@@ -25,17 +25,16 @@ chatSocket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
 };
 
-document.querySelector('#chat-message-input').focus();
-document.querySelector('#chat-message-input').onkeyup = function(e) {
+$('#chat-message-input').focus();
+$('#chat-message-input').onkeyup = function(e) {
             if (e.keyCode === 13) {  // enter, return
-                document.querySelector('#chat-message-submit').click();
+                $('#chat-message-submit').click();
             }
 };
 
 document.querySelector('#chat-message-submit').onclick = function(e) {
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
-            console.log(messageInputDom)
             chatSocket.send(JSON.stringify({
                 'command': 'new_message',
                 'message': message
