@@ -7,17 +7,18 @@ const chatSocket = new WebSocket(
 );
 
 chatSocket.onmessage = function(e) {
-            // console.log(e.data);
             const data = JSON.parse(e.data);
             console.log(data)
             if (data.type == "user.connect") {
               console.log(data.data.username);
               $("#usernameList").append("<p> " + data.data.username + "</p>")
             }
-            if (data.type == "fetch.message") {
-              document.querySelector('#chat-log').value += (data.content + '\n');
+            if (data.type == "fetch.messages") {
+              document.querySelector('#chat-log').value += (data.author_id + ' says:  ' + data.content + ' at ' + data.date + '\n');
             }
-            document.querySelector('#chat-log').value += (data.content + '\n');
+            if (data.command == "new_message") {
+              document.querySelector('#chat-log').value += (data.message + '\n');
+            }
 };
 
 chatSocket.onclose = function(e) {

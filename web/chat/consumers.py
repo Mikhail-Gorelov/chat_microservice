@@ -28,6 +28,7 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         self.room = "general_room"
         await self.channel_layer.group_add(self.room, self.channel_name)
         await self.accept()
+        await database_sync_to_async(self.create_author)()
         await self.channel_layer.group_send(self.room, {
             "type": "fetch.messages",
             "data": {},
@@ -47,11 +48,17 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         # здесь вызвать group_send и забрать 10 последних сообщений из бд
         # await self.close()
 
-    def create_author(self, username="mikell"):
-        return models.Author.objects.create(username=username)
+    def create_author(self):
+        return models.Author.objects.create(username=self.username)
 
     def create_message(self, content, date):
-        return models.Message.objects.create(content=content, date=date, author=self.create_author())
+        return models.Message.objects.create(content=content, date=date, author=self.get_author())
+
+    def get_author_name(self, custom_id):
+        return models.Author.objects.filter(id=custom_id).values()[0].get("username")
+
+    def get_author(self):
+        return models.Author.objects.filter(username=self.username)[0]
 
     async def new_message(self, data):
         # сохранять сообщения в бд
@@ -73,6 +80,8 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         # data = await list(queryset)
         for i in await self.get_last_messages():
             i["type"] = event["type"]
+            custom_id = i["author_id"]
+            i["author_id"] = await database_sync_to_async(self.get_author_name)(custom_id)
             await self.send_json(content=i)
         # await self.send_json(content=data)
 
