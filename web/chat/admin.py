@@ -5,7 +5,7 @@ from . import models
 @admin.register(models.Author)
 class AuthorAdmin(admin.ModelAdmin):
     search_fields = ('username',)
-    list_display = ('username',)
+    list_display = ('username', 'status')
 
 
 @admin.register(models.Message)
