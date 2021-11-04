@@ -1,23 +1,47 @@
-{% extends "base.html" %}
-{% load static main %}
-{% block container %}
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <title>Chat Room</title>
-</head>
-<body>
-    <textarea id="chat-log" cols="175" rows="20"></textarea><br>
-    <input id="chat-message-input" type="text" size="175"><br>
-    <input id="chat-message-submit" type="button" value="Send">
-    {{ username|json_script:"username" }}
-    <h4>Users in chat:</h4>
-    <div id="usernameList"></div>
-</body>
-</html>
-{% endblock container %}
+{% extends "chat/base.html" %}
+{% load static %}
+{% block head %}
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" type="text/css"
+        rel="stylesheet">
+  <link href="{% static 'chat/css/index.css' %}" rel="stylesheet">
+{% endblock %}
 
+{% block container %}
+  <h3 class=" text-center">Messaging</h3>
+  <div class="messaging">
+    <div class="inbox_msg">
+      <div class="inbox_people">
+        <div class="headind_srch">
+          <div class="recent_heading">
+            <h4>Recent</h4>
+               <a id="blog-connect" data-href="http://localhost:8008/init" data-id="2">Перейти в блог</a>
+          </div>
+          <div class="srch_bar">
+            <div class="stylish-input-group">
+              <input type="text" class="search-bar" placeholder="Search">
+              <span class="input-group-addon">
+                <button type="button"> <i class="fa fa-search" aria-hidden="true"></i></button>
+                </span></div>
+          </div>
+        </div>
+        <div class="inbox_chat" data-href="{% url "chat:chat-list" %}">
+        </div>
+      </div>
+      <div id="chatId" class="mesgs" data-id="{{ chat }}">
+          {% include "chat/includes/messages.html" %}
+        </div>
+        <div class="type_msg">
+          <div class="input_msg_write">
+            <input type="text" class="write_msg" placeholder="Type a message"/>
+            <button class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o" aria-hidden="true"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock container %}
 {% block jquery %}
-$.getScript('{% static 'chat/js/direct_chat.js' %}');
+  $.getScript('{% static 'chat/js/api.js' %}');
+  $.getScript('{% static 'chat/js/reconnecting_websocket.js' %}');
+  $.getScript('{% static 'chat/js/true_chat.js' %}');
 {% endblock jquery %}

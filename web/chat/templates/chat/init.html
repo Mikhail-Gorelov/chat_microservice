@@ -1,0 +1,5 @@
+{% extends "chat/base.html" %}
+{% load static %}
+{% block jquery %}
+  $.getScript('{% static 'chat/js/chat_init.js' %}');
+{% endblock jquery %}

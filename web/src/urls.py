@@ -9,7 +9,8 @@ admin_url = settings.ADMIN_URL
 
 urlpatterns = [
     path('', include('main.urls')),
-    path('chat/', include('chat.urls')),
+    path('', include('chat.urls')),
+    path('', include('microservice_requests.urls')),
     path(f'{admin_url}/', admin.site.urls),
     path(f'{admin_url}/defender/', include('defender.urls')),
     path('api/', include('rest_framework.urls')),

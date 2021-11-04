@@ -1,5 +1,6 @@
 import pytz
 from rest_framework import serializers
+from chat.services import ChatService
 
 
 class SetTimeZoneSerializer(serializers.Serializer):

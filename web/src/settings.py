@@ -33,6 +33,10 @@ ENABLE_SILK = int(os.environ.get('ENABLE_SILK', 0))
 ENABLE_DEBUG_TOOLBAR = int(os.environ.get('ENABLE_DEBUG_TOOLBAR', 0))
 ENABLE_RENDERING = int(os.environ.get('ENABLE_RENDERING', 1))
 
+SESSION_COOKIE_NAME = 'sessionid_chat'
+CSRF_COOKIE_NAME = 'csrftoken_chat'
+JWT_COOKIE_NAME = os.environ.get('JWT_COOKIE_NAME', 'jwt-auth')
+
 INTERNAL_IPS = []
 
 ADMIN_URL = os.environ.get('ADMIN_URL', 'admin')
@@ -41,6 +45,8 @@ SWAGGER_URL = os.environ.get('SWAGGER_URL')
 
 API_KEY_HEADER = os.environ.get('API_KEY_HEADER')
 API_KEY = os.environ.get('API_KEY')
+BLOG_API_URL = os.environ.get('BLOG_API_URL')
+BLOG_API_KEY = os.environ.get('BLOG_API_KEY')
 
 HEALTH_CHECK_URL = os.environ.get('HEALTH_CHECK_URL')
 
@@ -57,6 +63,8 @@ INSTALLED_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
     'defender',
     'rest_framework',
     'drf_yasg',
@@ -68,6 +76,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'main.apps.MainConfig',
     'chat.apps.ChatConfig',
+    'microservice_requests.apps.MicroserviceRequestsConfig',
 
 ]
 
@@ -98,10 +107,11 @@ CHANNEL_LAYERS = {
 }
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        'microservice_request.permissions.HasApiKeyOrIsAuthenticated',
+        # 'microservice_request.permissions.HasApiKeyOrIsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'chat.authentication.ExampleAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
