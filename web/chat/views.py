@@ -9,11 +9,12 @@ from main.pagination import BasePageNumberPagination
 from chat.models import Message
 from main.services import MainService
 from .authentication import ExampleAuthentication
-from .serializers import ChatInitSerializer
+from .serializers import ChatInitSerializer, ChatShortInfoSerializer
 from .services import ChatService
 from rest_framework.generics import ListAPIView, GenericAPIView
 from . import serializers
 from rest_framework import viewsets, status
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -50,11 +51,18 @@ class UserChatView(ListAPIView):
     serializer_class = serializers.ChatListSerializer
     pagination_class = BasePageNumberPagination
 
+    # get serializer context - метод
+
     def get_queryset(self):
-        user_data = ChatService.validate_user_jwt(self.request.COOKIES.get(settings.JWT_COOKIE_NAME), self.request)
+        user_data = ChatService.get_or_set_user_jwt(self.request.COOKIES.get(settings.JWT_COOKIE_NAME), self.request)
         print(user_data)
         return ChatService.get_user_chats(user_data['id'])
 
+    def get_serializer_context(self):
+        pass
+
+
+# super + дополнить новым ключём, добавить сериалайзер field. добавить словарь из данных пользователя.
 
 class MessageChatView(ListAPIView):
     serializer_class = serializers.MessageListSerializer
@@ -96,6 +104,17 @@ class ChatInitView(GenericAPIView):
 
     def get(self, request):
         return Response()
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.save()
+        return Response(data)
+
+
+class ChatShortInfoView(GenericAPIView):
+    serializer_class = ChatShortInfoSerializer
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)

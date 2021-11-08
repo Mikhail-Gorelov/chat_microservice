@@ -1,7 +1,7 @@
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
 from rest_framework.status import HTTP_400_BAD_REQUEST
-
+from django.core.cache import cache
 from main.services import MainService
 from . import models
 
@@ -28,11 +28,18 @@ class ChatService:
         return models.Chat.objects.all()
 
     @staticmethod
-    def validate_user_jwt(jwt: str, request):
+    def get_or_set_user_jwt(jwt: str, request):
+        # varlous operator
+        cache_key = cache.make_key('user_jwt', jwt)
+        if data := cache.get(cache_key):
+            print(data, "in cache")
+            return data
+        print(cache_key)
         url = '/jwt/callback/'
         service = MainService(request=request, url=url)
         response = service.service_response(method="post", data={"auth": jwt})
         if response.status_code == HTTP_400_BAD_REQUEST:
             raise ValidationError(response.data)
         print(response.data)
+        cache.set(cache_key, response.data, timeout=600)
         return response.data

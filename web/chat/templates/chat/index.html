@@ -1,5 +1,6 @@
 {% extends "chat/base.html" %}
 {% load static %}
+{% load cache %}
 {% block head %}
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" type="text/css"
         rel="stylesheet">
@@ -7,38 +8,42 @@
 {% endblock %}
 
 {% block container %}
-  <h3 class=" text-center">Messaging</h3>
-  <div class="messaging">
-    <div class="inbox_msg">
-      <div class="inbox_people">
-        <div class="headind_srch">
-          <div class="recent_heading">
-            <h4>Recent</h4>
-               <a id="blog-connect" data-href="http://localhost:8008/init" data-id="2">Перейти в блог</a>
+<div class="container">
+<h3 class=" text-center">Messaging</h3>
+<div class="messaging">
+      <div class="inbox_msg">
+          <div class="inbox_people">
+          <div class="headind_srch">
+            <div class="recent_heading">
+              <h4>Recent</h4>
+            </div>
+            <div class="srch_bar">
+              <div class="stylish-input-group">
+                <input type="text" class="search-bar" placeholder="Search">
+                <span class="input-group-addon">
+                  <button type="button"> <i class="fa fa-search" aria-hidden="true"></i></button>
+                  </span></div>
+            </div>
           </div>
-          <div class="srch_bar">
-            <div class="stylish-input-group">
-              <input type="text" class="search-bar" placeholder="Search">
-              <span class="input-group-addon">
-                <button type="button"> <i class="fa fa-search" aria-hidden="true"></i></button>
-                </span></div>
+          <div class="inbox_chat" data-href="{% url "chat:chat-list" %}">
           </div>
         </div>
-        <div class="inbox_chat" data-href="{% url "chat:chat-list" %}">
-        </div>
-      </div>
-      <div id="chatId" class="mesgs" data-id="{{ chat }}">
-          {% include "chat/includes/messages.html" %}
-        </div>
-        <div class="type_msg">
+        <div class="mesgs">
+          <div class="msg_history">
+            {% include "chat/includes/messages.html" %}
+              <div id="chatId" class="mesgs" data-id="{{ chat }}">
+              </div>
+          </div>
+          <div class="type_msg">
           <div class="input_msg_write">
-            <input type="text" class="write_msg" placeholder="Type a message"/>
-            <button class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o" aria-hidden="true"></i></button>
+              <input type="text" class="write_msg" placeholder="Type a message"/>
+              <button class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o" aria-hidden="true"></i></button>
           </div>
+        </div>
         </div>
       </div>
     </div>
-  </div>
+</div>
 {% endblock container %}
 {% block jquery %}
   $.getScript('{% static 'chat/js/api.js' %}');

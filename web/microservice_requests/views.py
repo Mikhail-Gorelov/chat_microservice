@@ -7,8 +7,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from dj_rest_auth import views as auth_views
 from main.services import MainService
-from . import serializers
-
 from . import services
 from . import serializers
 

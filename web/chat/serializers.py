@@ -106,14 +106,27 @@ class ChatInitSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(min_value=1)
 
     def validate_auth(self, auth: str):
-        self.user_data: dict = ChatService.validate_user_jwt(auth, request=self.context['request'])
-        # есть данные, вернуть в save
+        self.user_data: dict = ChatService.get_or_set_user_jwt(auth, request=self.context['request'])
         return auth
 
     def save(self, **kwargs):
-        # создать здесь комнату (id) user_data
-        # создать комнату с jwt token (user_data id) и user_id
-        # проверка есть ли комната с этим пользователем
-        # актив / не актив комнат
+        chat = models.Chat.objects.filter(user_chats__user_id=self.user_data['id']).filter(
+            user_chats__user_id=self.validated_data['user_id'])
+        if not chat.exists():
+            new_chat = models.Chat.objects.create(
+                name="Chat with user " + str(self.user_data['id']) + " and user " + str(self.validated_data['user_id']))
+            models.UserChat.objects.bulk_create([
+                models.UserChat(user_id=self.user_data['id'], chat=new_chat),
+                models.UserChat(user_id=self.validated_data['user_id'], chat=new_chat),
+            ])
         return self.user_data
-        # ordereddict here
+
+
+class ChatShortInfoSerializer(serializers.Serializer):
+    user_id = serializers.ListField(child=serializers.IntegerField())
+
+    def save(self, **kwargs):
+        return super().save(**kwargs)
+
+    def create(self, validated_data):
+        return super().create(validated_data)

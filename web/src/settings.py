@@ -105,6 +105,16 @@ CHANNEL_LAYERS = {
         },
     },
 }
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL + "/3",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+    }
+}
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         # 'microservice_request.permissions.HasApiKeyOrIsAuthenticated',

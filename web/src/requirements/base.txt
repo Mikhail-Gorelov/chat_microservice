@@ -44,6 +44,7 @@ python-json-logger==2.0.1
 django-rosetta==0.9.6
 
 dj-rest-auth
+django-redis
 
 # Jaeger OpenTracing
 jaeger-client==4.4.0
