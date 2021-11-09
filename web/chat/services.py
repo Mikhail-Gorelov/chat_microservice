@@ -43,3 +43,14 @@ class ChatService:
         print(response.data)
         cache.set(cache_key, response.data, timeout=600)
         return response.data
+
+    @staticmethod
+    def get_users_information(data: list, request):
+        url = '/user-information/'
+        service = MainService(request=request, url=url)
+        return_dict = {}
+        for user in data:
+            response = service.service_response(method="post", data={"user_id": user})
+            return_dict.update(response.data)
+        return return_dict
+

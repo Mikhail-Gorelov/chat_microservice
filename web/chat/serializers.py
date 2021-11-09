@@ -124,9 +124,11 @@ class ChatInitSerializer(serializers.Serializer):
 
 class ChatShortInfoSerializer(serializers.Serializer):
     user_id = serializers.ListField(child=serializers.IntegerField())
+    # user_id = serializers.IntegerField(min_value=1)
 
     def save(self, **kwargs):
         return super().save(**kwargs)
 
     def create(self, validated_data):
-        return super().create(validated_data)
+        print(validated_data)
+        return validated_data
