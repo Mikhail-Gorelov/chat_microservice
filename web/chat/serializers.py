@@ -69,7 +69,19 @@ class ChatSerializer(serializers.Serializer):
         return chat
 
 
+class UserChatShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.UserChat
+        fields = ("user_id",)
+
+
 class ChatListSerializer(serializers.ModelSerializer):
+    # user_chats = UserChatShortSerializer(many=True)
+    user_chats = serializers.SerializerMethodField('get_users')
+
+    def get_users(self, obj):
+        print(self.context)
+
     class Meta:
         model = models.Chat
         fields = "__all__"
@@ -124,11 +136,6 @@ class ChatInitSerializer(serializers.Serializer):
 
 class ChatShortInfoSerializer(serializers.Serializer):
     user_id = serializers.ListField(child=serializers.IntegerField())
-    # user_id = serializers.IntegerField(min_value=1)
-
-    def save(self, **kwargs):
-        return super().save(**kwargs)
 
     def create(self, validated_data):
-        print(validated_data)
-        return validated_data
+        return ChatService.get_users_information(data=validated_data, request=self.context['request'])

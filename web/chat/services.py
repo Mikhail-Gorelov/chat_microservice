@@ -29,10 +29,9 @@ class ChatService:
 
     @staticmethod
     def get_or_set_user_jwt(jwt: str, request):
-        # varlous operator
         cache_key = cache.make_key('user_jwt', jwt)
         if data := cache.get(cache_key):
-            print(data, "in cache")
+            print("user cache is here")
             return data
         print(cache_key)
         url = '/jwt/callback/'
@@ -46,11 +45,7 @@ class ChatService:
 
     @staticmethod
     def get_users_information(data: list, request):
-        url = '/user-information/'
+        url = '/chat/user-information/'
         service = MainService(request=request, url=url)
-        return_dict = {}
-        for user in data:
-            response = service.service_response(method="post", data={"user_id": user})
-            return_dict.update(response.data)
-        return return_dict
-
+        response = service.service_response(method="post", data=data)
+        return response.data

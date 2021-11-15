@@ -10,7 +10,6 @@ router = DefaultRouter()
 router.register(r'main', views.ChatViewSet, basename='main')
 
 urlpatterns = [
-    # path('', cache_page(60)(TemplateAPIView.as_view(template_name='chat/index.html')), name='index'),
     path('', TemplateAPIView.as_view(template_name='chat/index.html'), name='index'),
     path('last-messages/', views.LastMessagesView.as_view(), name="last-messages"),
     path('rest-websocket/', views.RestAndWebsocketView.as_view(), name="rest-websocket"),

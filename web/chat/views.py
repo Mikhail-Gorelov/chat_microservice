@@ -51,18 +51,15 @@ class UserChatView(ListAPIView):
     serializer_class = serializers.ChatListSerializer
     pagination_class = BasePageNumberPagination
 
-    # get serializer context - метод
-
     def get_queryset(self):
-        user_data = ChatService.get_or_set_user_jwt(self.request.COOKIES.get(settings.JWT_COOKIE_NAME), self.request)
-        print(user_data)
-        return ChatService.get_user_chats(user_data['id'])
+        self.user_data = ChatService.get_or_set_user_jwt(self.request.COOKIES.get(settings.JWT_COOKIE_NAME), self.request)
+        return ChatService.get_user_chats(self.user_data['id'])
 
     def get_serializer_context(self):
-        pass
+        context = super(UserChatView, self).get_serializer_context()
+        context.update(self.user_data)
+        return context
 
-
-# super + дополнить новым ключём, добавить сериалайзер field. добавить словарь из данных пользователя.
 
 class MessageChatView(ListAPIView):
     serializer_class = serializers.MessageListSerializer
