@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 class CategoriesListView(GenericAPIView):
     serializer_class = serializers.PostCategoryInBlog
     permission_classes = (AllowAny,)
+    swagger_schema = None
 
     def get(self, request):
         service = MainService(request=request, url='/categories/')
@@ -35,6 +36,7 @@ class CategoriesListView(GenericAPIView):
 class CategoryChangeView(GenericAPIView):
     serializer_class = serializers.PostCategoryInBlog
     permission_classes = (AllowAny,)
+    swagger_schema = None
 
     # TODO: удаляет, но с ошибкой - вопрос почему
     def delete(self, request, *args, **kwargs):
@@ -54,11 +56,13 @@ class CategoryChangeView(GenericAPIView):
 class LoginView(auth_views.LoginView):
     serializer_class = serializers.LoginSerializer
     # authentication_classes = (ExampleAuthentication,)
+    swagger_schema = None
 
 
 class ChatRegisterView(GenericAPIView):
     serializer_class = serializers.RegisterUserInBlog
     permission_classes = (AllowAny,)
+    swagger_schema = None
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)

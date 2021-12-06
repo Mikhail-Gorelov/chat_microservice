@@ -29,10 +29,9 @@
           </div>
         </div>
         <div class="mesgs">
+          {#<p style="text-align:right">Hello world!</p> include sidebar here#}
+          {#{% include 'chat/sidebar.html' %} TODO: нужно сделать красивый sidebar#}
           <div class="msg_history">
-            {% include "chat/includes/messages.html" %}
-              <div id="chatId" class="mesgs" data-id="{{ chat }}">
-              </div>
           </div>
           <div class="type_msg">
           <div class="input_msg_write">
@@ -48,5 +47,6 @@
 {% block jquery %}
   $.getScript('{% static 'chat/js/api.js' %}');
   $.getScript('{% static 'chat/js/reconnecting_websocket.js' %}');
+  $.getScript('{% static 'chat/js/chat_sockets.js' %}');
   $.getScript('{% static 'chat/js/true_chat.js' %}');
 {% endblock jquery %}

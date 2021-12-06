@@ -3,7 +3,7 @@ $(function () {
   $('#chat-message-submit').click(sendMessage);
   getLastMessages();
 
-  console.log("Hello!");
+  console.log("Initialized chat");
 });
 let chat = null;
 
@@ -43,7 +43,6 @@ function closeChat(e) {
 function sendMessage() {
   const message = $('#chat-message-input').val();
   console.log(message)
-  // const message = messageInputDom.value;
   chat.send(JSON.stringify({
     'command': 'new_message',
     'message': message,
@@ -51,10 +50,6 @@ function sendMessage() {
   }));
   message.value = '';
 }
-
-// const sendMessage1 = () => {
-//   console.log("send message");
-// }
 
 function getLastMessages() {
   $.ajax({
@@ -67,7 +62,6 @@ function getLastMessages() {
 }
 
 function messageRender(data) {
-  // console.log(data);
   $.each(data, function (i) {
     let message = `${data[i].author_id} says: ${data[i].content} at ${data[i].date}\n`;
     $('#chat-log').append(message);

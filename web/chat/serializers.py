@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+from main.utils import find_dict_in_list
 import main.models
 from django.contrib.auth import get_user_model
 from . import models, services
@@ -70,21 +70,33 @@ class ChatSerializer(serializers.Serializer):
 
 
 class UserChatShortSerializer(serializers.ModelSerializer):
+
+    def to_representation(self, instance):
+        to_repr = super().to_representation(instance)
+        output_list = list()
+        if find_dict_in_list(self.context['user_data'], 'id', to_repr['user_id']) != {}:
+            output_list.append(find_dict_in_list(self.context['user_data'], 'id', to_repr['user_id']))
+        return [item for item in output_list if type(item) is dict]
+
     class Meta:
         model = models.UserChat
         fields = ("user_id",)
 
 
 class ChatListSerializer(serializers.ModelSerializer):
-    # user_chats = UserChatShortSerializer(many=True)
     user_chats = serializers.SerializerMethodField('get_users')
+    date = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    last_message = serializers.SerializerMethodField('get_last_message')
 
     def get_users(self, obj):
-        print(self.context)
+        return UserChatShortSerializer(obj.user_chats, many=True, context=self.context).data
+
+    def get_last_message(self, obj):
+        return obj.last_message
 
     class Meta:
         model = models.Chat
-        fields = "__all__"
+        fields = ("id", "name", "description", "status", "date", "file", "last_message", "user_chats")
 
 
 class ChatSerializerCheck(serializers.ModelSerializer):
@@ -94,9 +106,11 @@ class ChatSerializerCheck(serializers.ModelSerializer):
 
 
 class MessageListSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+
     class Meta:
         model = models.Message
-        fields = ("content", "date", "chat", "author_status")
+        fields = ("content", "date", "chat", "author_status", "author_id")
 
     # TODO: Продумать более хитрую валидацию, чтобы работало
     def validate(self, data):
@@ -118,7 +132,7 @@ class ChatInitSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(min_value=1)
 
     def validate_auth(self, auth: str):
-        self.user_data: dict = ChatService.get_or_set_user_jwt(auth, request=self.context['request'])
+        self.user_data: dict = ChatService.get_or_set_user_jwt(auth)
         return auth
 
     def save(self, **kwargs):
@@ -138,4 +152,5 @@ class ChatShortInfoSerializer(serializers.Serializer):
     user_id = serializers.ListField(child=serializers.IntegerField())
 
     def create(self, validated_data):
+        print(validated_data)
         return ChatService.get_users_information(data=validated_data, request=self.context['request'])

@@ -12,7 +12,7 @@ django.core.exceptions.AppRegistryNotReady: Apps aren't loaded yet.
 """
 
 from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
+from chat.middleware import AuthMiddlewareStack
 from channels.security.websocket import OriginValidator
 from chat.routing import websocket_urlpatterns as chat_urlpatterns
 

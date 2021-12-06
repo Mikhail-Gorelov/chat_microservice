@@ -15,6 +15,8 @@ from rest_framework.generics import ListAPIView, GenericAPIView
 from . import serializers
 from rest_framework import viewsets, status
 from django.core.cache import cache
+from . import models
+from main.models import UserData
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +54,15 @@ class UserChatView(ListAPIView):
     pagination_class = BasePageNumberPagination
 
     def get_queryset(self):
-        self.user_data = ChatService.get_or_set_user_jwt(self.request.COOKIES.get(settings.JWT_COOKIE_NAME), self.request)
-        return ChatService.get_user_chats(self.user_data['id'])
+        user_data = ChatService.get_or_set_user_jwt(
+            self.request.COOKIES.get(settings.JWT_COOKIE_NAME)
+        )
+        self.user = UserData(**user_data)
+        return ChatService.get_user_chats(user_id=self.user.id)
 
     def get_serializer_context(self):
         context = super(UserChatView, self).get_serializer_context()
-        context.update(self.user_data)
+        context['user_data'] = ChatService.get_chat_contacts_data(self.user.id, self.request)
         return context
 
 
@@ -68,7 +73,7 @@ class MessageChatView(ListAPIView):
     # вот здесь должна быть правка о том, что именно определённые письма выводятся
     # пока хардкодим, смотрим на что-то подобное из блога
     def get_queryset(self):
-        return ChatService.get_messages_in_chat(chat=self.kwargs.get("chat_id"))
+        return ChatService.get_user_chats(chat_id=self.kwargs.get("chat_id"))
 
     def get_template_name(self):
         return 'chat/includes/messages.html'
@@ -82,7 +87,7 @@ class ChatViewSet(viewsets.ModelViewSet):
     parser_classes = (FormParser, MultiPartParser)
 
     def get_queryset(self):
-        return ChatService.get_all_chats()
+        return models.Chat.objects.all()
 
 
 class LastChatMessage(ListAPIView):

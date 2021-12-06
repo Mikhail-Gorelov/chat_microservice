@@ -1,12 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
+from typing import NamedTuple
 
 from .managers import UserManager
 
 
 class User(AbstractUser):
-
     username = None
     email = models.EmailField(_('Email address'), unique=True)
 
@@ -24,3 +24,11 @@ class User(AbstractUser):
 
     def full_name(self):
         return super().get_full_name()
+
+
+class UserData(NamedTuple):
+    id: int
+    full_name: str
+    image: str
+    profile: str
+
