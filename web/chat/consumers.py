@@ -5,6 +5,7 @@ from main.services import MainService
 from . import models, serializers
 from urllib.parse import parse_qs
 from django.core.cache import cache
+from .services import ChatService, AsyncChatService
 
 
 def parse_query_string(query_string):
@@ -30,40 +31,18 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         return list(serializer.data)
 
     async def connect(self):
-        await self.accept()
         self.user = self.scope['user']
-        cache_key = cache.make_key('user_jwt', self.scope['user'])
-        data = cache.get(cache_key)
-        # service = MainService(request=request, url=f'/categories/{slug}/')
-        # response = service.service_response(method="post")
-        # print(response.data)
-        print(data)
-    #     print(self.room_name)
-    #     self.room_group_name = 'chat_%s' % self.room_name
-    #     self.username = 'mike'
-    #     # self.username = parse_query_string(self.scope['query_string'].decode("utf-8")).get("username")[0]
-    #     if self.username == '':
-    #         await self.close()
-    #     print(self.username)
-    #     # await self.websocket_connect_user()
-    #     # self.author_obj = await self.create_author()
-    #     await self.channel_layer.group_add(
-    #         self.room_group_name,
-    #         self.channel_name
-    #     )
-    #     # здесь мне нужно выполнить ещё одну проверку на то, что можно писать в чат
-    #     await self.accept()
-    #
-    #     # await self.check_chat_status(self.room_name)
-    #
-    #     await self.channel_layer.group_send(self.room_group_name, {
-    #         "type": "user.connect",
-    #         "data": {"username": self.username},
-    #     })
-    #     await self.channel_layer.group_send(self.room_group_name, {
-    #         "type": "fetch.messages",
-    #         "data": {},
-    #     })
+        await self.init_user_chat()
+        await self.accept()
+        # await self.channel_layer.group_send(self.room_group_name, {
+        #     "type": "fetch.messages",
+        #     "data": {},
+        # })
+
+    async def init_user_chat(self):
+        chat_list: list[str] = await AsyncChatService.get_chat_list(self.user['id'])
+        for chat in chat_list:
+            await self.channel_layer.group_add(str(chat), self.channel_name)
 
     async def disconnect(self, close_code):
         pass

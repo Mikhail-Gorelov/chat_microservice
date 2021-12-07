@@ -25,12 +25,12 @@ function chatListRender(data) {
   let chatList = data.results
   $.each(chatList, function (i) {
     let chat = `
-    <div class="chat_list" id="${chatList[i].id}" href="${chatList[i].user_chats[1][0].image}">
+    <div class="chat_list" id="${chatList[i].id}" href="${chatList[i].user_chats[1].image}">
             <div class="chat_people">
               <div class="chat_img"><img src="${chatList[i].file}" alt="sunil"></div>
               <div class="chat_ib">
                 <h5>${chatList[i].name} <span class="chat_date">${chatList[i].date}</span></h5>
-                <p>${chatList[i].description}</p>
+                <p>${chatList[i].last_message}</p>
               </div>
             </div>
           </div>

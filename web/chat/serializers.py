@@ -76,7 +76,7 @@ class UserChatShortSerializer(serializers.ModelSerializer):
         output_list = list()
         if find_dict_in_list(self.context['user_data'], 'id', to_repr['user_id']) != {}:
             output_list.append(find_dict_in_list(self.context['user_data'], 'id', to_repr['user_id']))
-        return [item for item in output_list if type(item) is dict]
+        return find_dict_in_list(self.context['user_data'], 'id', to_repr['user_id'])
 
     class Meta:
         model = models.UserChat

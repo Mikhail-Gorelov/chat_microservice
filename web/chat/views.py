@@ -73,7 +73,7 @@ class MessageChatView(ListAPIView):
     # вот здесь должна быть правка о том, что именно определённые письма выводятся
     # пока хардкодим, смотрим на что-то подобное из блога
     def get_queryset(self):
-        return ChatService.get_user_chats(chat_id=self.kwargs.get("chat_id"))
+        return ChatService.get_messages_in_chat(chat=self.kwargs.get("chat_id")).order_by("id")
 
     def get_template_name(self):
         return 'chat/includes/messages.html'

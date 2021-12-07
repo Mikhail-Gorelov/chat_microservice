@@ -1,5 +1,5 @@
 from channels.sessions import CookieMiddleware
-from chat.services import ChatService
+from chat.services import AsyncChatService
 
 
 class CookieAuthMiddleware:
@@ -10,9 +10,8 @@ class CookieAuthMiddleware:
         user_jwt = scope['cookies'].get('jwt-auth')
         if not user_jwt:
             return
-        print(user_jwt)
-        scope['user'] = ChatService.get_or_set_user_jwt(user_jwt)
-        return self.app(scope, receive, send)
+        scope['user'] = await AsyncChatService.get_user(user_jwt)
+        return await self.app(scope, receive, send)
 
 
 def AuthMiddlewareStack(inner):
