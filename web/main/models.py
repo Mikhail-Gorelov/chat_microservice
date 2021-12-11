@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from typing import NamedTuple
-
+from uuid import uuid4
 from .managers import UserManager
 
 
@@ -32,3 +32,16 @@ class UserData(NamedTuple):
     image: str
     profile: str
 
+
+class ChatData(NamedTuple):
+    id: uuid4
+    name: str
+    description: str
+    status: int
+    date: str
+    file: str
+    last_message: str
+
+
+class ChatDataId(NamedTuple):
+    id: uuid4

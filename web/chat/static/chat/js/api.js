@@ -7,6 +7,7 @@ function getChatList() {
     url: $(".inbox_chat").attr("data-href"),
     type: "GET",
     success: function (data) {
+      console.log(data);
       chatListRender(data);
     },
   })
@@ -24,12 +25,18 @@ function makeChatActive(e) {
 function chatListRender(data) {
   let chatList = data.results
   $.each(chatList, function (i) {
+    if (chatList[i].last_message == null) {
+         chatList[i].last_message = "no messages";
+    }
+    if (chatList[i].last_message_date == null) {
+      chatList[i].last_message_date = chatList[i].date;
+    }
     let chat = `
     <div class="chat_list" id="${chatList[i].id}" href="${chatList[i].user_chats[1].image}">
             <div class="chat_people">
               <div class="chat_img"><img src="${chatList[i].file}" alt="sunil"></div>
               <div class="chat_ib">
-                <h5>${chatList[i].name} <span class="chat_date">${chatList[i].date}</span></h5>
+                <h5>${chatList[i].name} <span class="chat_date">${chatList[i].last_message_date}</span></h5>
                 <p>${chatList[i].last_message}</p>
               </div>
             </div>
@@ -40,8 +47,18 @@ function chatListRender(data) {
   $(".chat_list").click(makeChatActive)
 }
 
-function getMessagesInChat(id, image) {
-  let url_web = "/message-list/" + id + "/";
+function convertTZ(date, tzString) {
+    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: tzString}));
+}
+
+function getMessagesInChat(id, image, url=null) {
+  let url_web = ""
+  if (url==null) {
+    url_web = "/message-list/" + id + "/";
+  }
+  else {
+    url_web = url;
+  }
   let currentUser = JSON.parse(localStorage.getItem('userData'));
   // let cookie_value = $.cookie("jwt-auth");
   // console.log(cookie_value);
@@ -75,6 +92,16 @@ function getMessagesInChat(id, image) {
         }
 
       })
+      // got current date, need to compare with messages and add date in list of messages
+      let currentDate = new Date();
+      convertTZ(currentDate, "Europe/Kiev");
+
+      if (data.next !=null) {
+        return getMessagesInChat(id, image, data.next);
+      }
+      if (data.next == null) {
+        $('.msg_history').scrollTop($('.msg_history').prop('scrollHeight'));
+      }
     },
 })
 }

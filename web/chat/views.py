@@ -5,7 +5,7 @@ from pyparsing import unicode
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from main.pagination import BasePageNumberPagination
+from main.pagination import BasePageNumberPagination, BaseCursorPagination
 from chat.models import Message
 from main.services import MainService
 from .authentication import ExampleAuthentication
@@ -58,7 +58,7 @@ class UserChatView(ListAPIView):
             self.request.COOKIES.get(settings.JWT_COOKIE_NAME)
         )
         self.user = UserData(**user_data)
-        return ChatService.get_user_chats(user_id=self.user.id)
+        return ChatService.get_last_message_from_chat(user_id=self.user.id)
 
     def get_serializer_context(self):
         context = super(UserChatView, self).get_serializer_context()
@@ -68,7 +68,7 @@ class UserChatView(ListAPIView):
 
 class MessageChatView(ListAPIView):
     serializer_class = serializers.MessageListSerializer
-    pagination_class = BasePageNumberPagination
+    pagination_class = BaseCursorPagination
 
     # вот здесь должна быть правка о том, что именно определённые письма выводятся
     # пока хардкодим, смотрим на что-то подобное из блога

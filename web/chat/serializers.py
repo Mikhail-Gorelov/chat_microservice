@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from main.utils import find_dict_in_list
 import main.models
+import datetime
+from datetime import timedelta
 from django.contrib.auth import get_user_model
 from . import models, services
 from asgiref.sync import async_to_sync
@@ -87,6 +89,7 @@ class ChatListSerializer(serializers.ModelSerializer):
     user_chats = serializers.SerializerMethodField('get_users')
     date = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
     last_message = serializers.SerializerMethodField('get_last_message')
+    last_message_date = serializers.SerializerMethodField('get_last_message_date')
 
     def get_users(self, obj):
         return UserChatShortSerializer(obj.user_chats, many=True, context=self.context).data
@@ -94,9 +97,16 @@ class ChatListSerializer(serializers.ModelSerializer):
     def get_last_message(self, obj):
         return obj.last_message
 
+    def get_last_message_date(self, obj):
+        if obj.last_message_date:
+            obj.last_message_date += timedelta(hours=2)
+            return obj.last_message_date.strftime("%d-%m-%Y %H:%M:%S")
+        return obj.last_message_date
+
     class Meta:
         model = models.Chat
-        fields = ("id", "name", "description", "status", "date", "file", "last_message", "user_chats")
+        fields = (
+            "id", "name", "description", "status", "date", "file", "last_message", "last_message_date", "user_chats")
 
 
 class ChatSerializerCheck(serializers.ModelSerializer):
@@ -138,6 +148,7 @@ class ChatInitSerializer(serializers.Serializer):
     def save(self, **kwargs):
         chat = models.Chat.objects.filter(user_chats__user_id=self.user_data['id']).filter(
             user_chats__user_id=self.validated_data['user_id'])
+        print(chat, "chat with users")
         if not chat.exists():
             new_chat = models.Chat.objects.create(
                 name="Chat with user " + str(self.user_data['id']) + " and user " + str(self.validated_data['user_id']))
@@ -145,6 +156,15 @@ class ChatInitSerializer(serializers.Serializer):
                 models.UserChat(user_id=self.user_data['id'], chat=new_chat),
                 models.UserChat(user_id=self.validated_data['user_id'], chat=new_chat),
             ])
+            data = {
+                "type": "add.chat",
+                "data": {
+                    'chat_id': str(new_chat.id),
+                    'user': self.user_data['id'],
+                },
+            }
+            async_to_sync(get_channel_layer().group_send)(f"events_for_user_{self.validated_data['user_id']}", data)
+            print("I am in save chat init", f"events_for_user_{self.validated_data['user_id']}")
         return self.user_data
 
 
