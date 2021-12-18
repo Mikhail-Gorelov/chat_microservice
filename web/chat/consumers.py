@@ -39,14 +39,17 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         chat_list: list[ChatDataId] = [ChatDataId(data) for data in
                                        await AsyncChatService.get_chat_list(self.user['id'])]
         await self.channel_layer.group_add(f"events_for_user_{self.user['id']}", self.channel_name)
-        print(f"events_for_user_{self.user['id']}")
+        # print(f"events_for_user_{self.user['id']}")
         for chat in chat_list:
             await self.channel_layer.group_add(str(chat.id), self.channel_name)
         return chat_list
 
     async def add_chat(self, event: dict):
-        print(event)
-        # await self.channel_layer.group_add(chat_id, self.channel_name)
+        data = event.get('data')
+        await self.channel_layer.group_add(data['chat_id'], self.channel_name)
+        data['command'] = 'add_chat'
+        print(data)
+        await self.send_json(content=data)
 
     async def disconnect(self, close_code):
         pass
@@ -78,7 +81,6 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
 
     commands = {
         "new_message": new_message,
-        # "add_chat": add_chat,
         "check_online_users": connect,
     }
 

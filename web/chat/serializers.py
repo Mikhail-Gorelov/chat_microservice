@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from main.utils import find_dict_in_list
-import main.models
+from main.models import UserData
 import datetime
 from datetime import timedelta
 from django.contrib.auth import get_user_model
@@ -35,7 +35,13 @@ class RestAndWebsocketSerializer(serializers.Serializer):
                 'username': self.validated_data.get("author"),
             },
         }
-        async_to_sync(get_channel_layer().group_send)("general_room", data)
+        # ????!!!!
+        # message = models.Message.objects.get(
+        #     content=self.validated_data.get("message"), author_id=int(self.validated_data.get("author"))
+        # )
+        # print(self.validated_data['message'], "rest and websocket serializer")
+        # ????!!!!
+        async_to_sync(get_channel_layer().group_send)("general room", data)
 
 
 # тут нужно сделать сериалайзер UserChat, далее нужно сделать тут же валидацию ???
@@ -142,29 +148,27 @@ class ChatInitSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(min_value=1)
 
     def validate_auth(self, auth: str):
-        self.user_data: dict = ChatService.get_or_set_user_jwt(auth)
+        user: dict = ChatService.get_or_set_user_jwt(auth)
+        self.user_data = UserData(**user)
         return auth
 
     def save(self, **kwargs):
-        chat = models.Chat.objects.filter(user_chats__user_id=self.user_data['id']).filter(
-            user_chats__user_id=self.validated_data['user_id'])
+        current_user: UserData = self.user_data
+        partner_user = self.validated_data['user_id']
+        chat = ChatService.filter_chat_by_two_users(current_user.id, partner_user)
         print(chat, "chat with users")
         if not chat.exists():
-            new_chat = models.Chat.objects.create(
-                name="Chat with user " + str(self.user_data['id']) + " and user " + str(self.validated_data['user_id']))
-            models.UserChat.objects.bulk_create([
-                models.UserChat(user_id=self.user_data['id'], chat=new_chat),
-                models.UserChat(user_id=self.validated_data['user_id'], chat=new_chat),
-            ])
+            new_chat = ChatService.create_chat(current_user.id, partner_user)
+            ChatService.create_user_chat(current_user.id, partner_user, new_chat)
             data = {
                 "type": "add.chat",
                 "data": {
                     'chat_id': str(new_chat.id),
-                    'user': self.user_data['id'],
+                    'user': current_user._asdict(),
                 },
             }
             async_to_sync(get_channel_layer().group_send)(f"events_for_user_{self.validated_data['user_id']}", data)
-            print("I am in save chat init", f"events_for_user_{self.validated_data['user_id']}")
+            # print("I am in save chat init", f"events_for_user_{self.validated_data['user_id']}")
         return self.user_data
 
 

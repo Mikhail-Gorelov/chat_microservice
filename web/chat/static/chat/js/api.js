@@ -1,3 +1,13 @@
+let requestedNewPage = false;
+$('.inbox_chat').scroll(function () {
+  if (($(this).prop('scrollHeight') - $(this).height()) <= $(this).scrollTop()+5&& !requestedNewPage) {
+    if ($(this).attr("data-href")) {
+      console.log("Hello world!");
+      requestedNewPage = true;
+      getChatList();
+    }
+  }
+});
 $(function () {
   getChatList();
 });
@@ -23,7 +33,9 @@ function makeChatActive(e) {
 }
 
 function chatListRender(data) {
-  let chatList = data.results
+  let chatList = data.results;
+  console.log(data.next);
+  $(".inbox_chat").attr("data-href", data.next);
   $.each(chatList, function (i) {
     if (chatList[i].last_message == null) {
          chatList[i].last_message = "no messages";
@@ -45,6 +57,7 @@ function chatListRender(data) {
     $('.inbox_chat').append(chat);
   })
   $(".chat_list").click(makeChatActive)
+  requestedNewPage = false;
 }
 
 function convertTZ(date, tzString) {
@@ -62,12 +75,43 @@ function getMessagesInChat(id, image, url=null) {
   let currentUser = JSON.parse(localStorage.getItem('userData'));
   // let cookie_value = $.cookie("jwt-auth");
   // console.log(cookie_value);
-  $.ajax({
+  console.log($(document).height());
+  console.log($('.msg_history').height());
+  console.log($('.msg_history').scrollTop());
+  // if ($(this).height() - $('.msg_history').height() == $('.msg_history').scrollTop()) {
+    $.ajax({
     url: url_web,
     type: "GET",
     success: function (data) {
       let message_list = data.results
       $.each(message_list, function (i) {
+        let messageDate = new Date();
+        convertTZ(messageDate, "Europe/Kiev");
+        let messageDateStringToday = ("0" + messageDate.getDate()).slice(-2) + "-" + ("0"+(messageDate.getMonth()+1)).slice(-2) + "-" +
+    messageDate.getFullYear();
+        let messageDateStringYesterday = ("0" + (messageDate.getDate()-1)).slice(-2) + "-" + ("0"+(messageDate.getMonth()+1)).slice(-2) + "-" +
+    messageDate.getFullYear();
+        let intermediateDate = ``;
+        if (messageDateStringToday === (message_list[i].date).split(" ")[0]) {
+          if (!$('div').hasClass("scroll-date-today")) {
+            let date = messageDateStringToday.split("-")[0] + "." + messageDateStringToday.split("-")[1]
+            intermediateDate = `<div class="scroll-date-today" align="center"><p>Today ${date}</p></div>`;
+          }
+        }
+
+        if ((message_list[i].date).split(" ")[0] !== messageDateStringToday && (message_list[i].date).split(" ")[0] !== messageDateStringYesterday) {
+          let id = (message_list[i].date).split(" ")[0]
+          if (!$('div').hasClass("scroll-date-${id}")) {
+            intermediateDate = `<div class="scroll-date-${id}" align="center"><p>${(message_list[i].date).split(" ")[0]}</p></div>`;
+          }
+        }
+        if (messageDateStringYesterday === (message_list[i].date).split(" ")[0]) {
+          if (!$('div').hasClass("scroll-date-yesterday")) {
+            let date = messageDateStringYesterday.split("-")[0] + "." + messageDateStringYesterday.split("-")[1]
+            intermediateDate = `<div class="scroll-date-yesterday" align="center"><p>Yesterday ${date}</p></div>`;
+          }
+        }
+        $('.msg_history').append(intermediateDate);
         if (message_list[i].author_id == currentUser.id) {
           let message = `
             <div class="outgoing_msg">
@@ -92,9 +136,6 @@ function getMessagesInChat(id, image, url=null) {
         }
 
       })
-      // got current date, need to compare with messages and add date in list of messages
-      let currentDate = new Date();
-      convertTZ(currentDate, "Europe/Kiev");
 
       if (data.next !=null) {
         return getMessagesInChat(id, image, data.next);
@@ -104,4 +145,5 @@ function getMessagesInChat(id, image, url=null) {
       }
     },
 })
+// }
 }

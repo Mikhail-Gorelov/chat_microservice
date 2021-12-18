@@ -20,6 +20,10 @@ function messageInChat(e) {
   if (data.type == "user.connect") {
     $("#usernameList").append(data.data.username + " ");
   }
+  if (data.command == "add_chat") {
+    console.log("added chat");
+    console.log("data");
+  }
   if (data.command == "new_message") {
     $('#chat-log').append(data.username + ": " + data.message + '\n');
     let currentUser = JSON.parse(localStorage.getItem('userData'));
@@ -47,7 +51,7 @@ function messageInChat(e) {
       $('.msg_history').append(message);
     }
     $('.msg_history').scrollTop($('.msg_history').prop('scrollHeight'));
-}
+  }
 }
 
 function sendMessage() {
