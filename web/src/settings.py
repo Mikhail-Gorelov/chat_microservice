@@ -10,11 +10,11 @@ from .additional_settings.celery_settings import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
-DEBUG = int(os.environ.get("DEBUG", default=1))
+DEBUG = int(os.environ.get('DEBUG', 1))
 
-ALLOWED_HOSTS: list = os.environ.get("DJANGO_ALLOWED_HOSTS").split(",")
+ALLOWED_HOSTS: list = os.environ.get('DJANGO_ALLOWED_HOSTS').split(',')
 
 AUTH_USER_MODEL = 'main.User'
 
@@ -24,7 +24,7 @@ SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', 'tester26')
 MICROSERVICE_TITLE = os.environ.get('MICROSERVICE_TITLE', 'Chat')
 MICROSERVICE_PREFIX = os.environ.get('MICROSERVICE_PREFIX', '')
 
-REDIS_URL = os.environ.get('REDIS_URL')
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://redis:6379')
 REDIS_SOCKET = os.environ.get('REDIS_SOCKET')
 
 USE_HTTPS = int(os.environ.get('USE_HTTPS', 0))
@@ -33,8 +33,6 @@ ENABLE_SILK = int(os.environ.get('ENABLE_SILK', 0))
 ENABLE_DEBUG_TOOLBAR = int(os.environ.get('ENABLE_DEBUG_TOOLBAR', 0))
 ENABLE_RENDERING = int(os.environ.get('ENABLE_RENDERING', 1))
 
-SESSION_COOKIE_NAME = 'sessionid_chat'
-CSRF_COOKIE_NAME = 'csrftoken_chat'
 JWT_COOKIE_NAME = os.environ.get('JWT_COOKIE_NAME', 'jwt-auth')
 
 INTERNAL_IPS = []
@@ -45,10 +43,10 @@ SWAGGER_URL = os.environ.get('SWAGGER_URL')
 
 API_KEY_HEADER = os.environ.get('API_KEY_HEADER')
 API_KEY = os.environ.get('API_KEY')
+
 BLOG_API_URL = os.environ.get('BLOG_API_URL')
 BLOG_API_KEY = os.environ.get('BLOG_API_KEY')
-
-HEALTH_CHECK_URL = os.environ.get('HEALTH_CHECK_URL')
+HEALTH_CHECK_URL = os.environ.get('HEALTH_CHECK_URL', '/application/health/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
@@ -59,12 +57,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
 ]
 
 THIRD_PARTY_APPS = [
-    'dj_rest_auth',
-    'dj_rest_auth.registration',
     'defender',
     'rest_framework',
     'drf_yasg',
@@ -76,7 +71,6 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'main.apps.MainConfig',
     'chat.apps.ChatConfig',
-    'microservice_requests.apps.MicroserviceRequestsConfig',
 
 ]
 
@@ -105,23 +99,13 @@ CHANNEL_LAYERS = {
         },
     },
 }
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_URL + "/3",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient"
-        },
-    }
-}
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        # 'microservice_request.permissions.HasApiKeyOrIsAuthenticated',
+        'microservice_request.permissions.HasApiKeyOrIsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'rest_framework.authentication.SessionAuthentication',
-        # 'chat.authentication.ExampleAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -160,14 +144,14 @@ WSGI_APPLICATION = 'src.wsgi.application'
 ASGI_APPLICATION = 'src.asgi.application'
 
 DATABASES = {
-    "default": {
-        "ENGINE": os.environ.get("SQL_ENGINE"),
-        "NAME": os.environ.get("POSTGRES_DB"),
-        "USER": os.environ.get("POSTGRES_USER"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("POSTGRES_SOCKET") or os.environ.get('POSTGRES_HOST'),
-        "PORT": os.environ.get("POSTGRES_PORT"),
-        "CONN_MAX_AGE": 0,
+    'default': {
+        'ENGINE': os.environ.get('SQL_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('POSTGRES_HOST'),
+        'PORT': os.environ.get('POSTGRES_PORT'),
+        'CONN_MAX_AGE': 0,
     },
 }
 
@@ -185,6 +169,16 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.environ.get('REDIS_SOCKET', 'unix:///redis_socket/redis-server.sock?db=1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
 
 LANGUAGE_CODE = 'en-us'
 
@@ -213,6 +207,9 @@ LANGUAGES = (
     ('en', _('English')),
 )
 
+SESSION_COOKIE_NAME = 'sessionid'
+CSRF_COOKIE_NAME = 'csrftoken'
+
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = LANGUAGE_CODE
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'English'
 ROSETTA_SHOW_AT_ADMIN_PANEL = True
@@ -230,12 +227,12 @@ if JAEGER_AGENT_HOST := os.environ.get('JAEGER_AGENT_HOST'):
     OPENTRACING_TRACE_ALL = True
     tracer = Config(
         config={
-            "sampler": {"type": "const", "param": 1},
-            "local_agent": {
-                "reporting_port": os.environ.get("JAEGER_AGENT_PORT", DEFAULT_REPORTING_PORT),
-                "reporting_host": JAEGER_AGENT_HOST,
+            'sampler': {'type': 'const', 'param': 1},
+            'local_agent': {
+                'reporting_port': os.environ.get('JAEGER_AGENT_PORT', DEFAULT_REPORTING_PORT),
+                'reporting_host': JAEGER_AGENT_HOST,
             },
-            "logging": int(os.environ.get('JAEGER_LOGGING', False)),
+            'logging': int(os.environ.get('JAEGER_LOGGING', False)),
         },
         service_name=MICROSERVICE_TITLE,
         validate=True,
@@ -246,15 +243,23 @@ if (SENTRY_DSN := os.environ.get('SENTRY_DSN')) and ENABLE_SENTRY:
     # More information on site https://sentry.io/
     from sentry_sdk import init
     from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.redis import RedisIntegration
+    from sentry_sdk.integrations.celery import CeleryIntegration
 
     init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
+        integrations=[
+            DjangoIntegration(),
+            RedisIntegration(),
+            CeleryIntegration(),
+        ],
 
         # Set traces_sample_rate to 1.0 to capture 100%
         # of transactions for performance monitoring.
         # We recommend adjusting this value in production.
-        traces_sample_rate=1.0,
+        traces_sample_rate=float(os.environ.get('SENTRY_TRACES_SAMPLE_RATE', '1.0')),
+        environment=os.environ.get('SENTRY_ENV', 'development'),
+        sample_rate=float(os.environ.get('SENTRY_SAMPLE_RATE', '1.0')),
 
         # If you wish to associate users to errors (assuming you are using
         # django.contrib.auth) you may enable sending PII data.
