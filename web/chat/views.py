@@ -31,6 +31,7 @@ class LastMessagesView(ListAPIView):
 
 class RestAndWebsocketView(GenericAPIView):
     serializer_class = serializers.RestAndWebsocketSerializer
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -41,6 +42,7 @@ class RestAndWebsocketView(GenericAPIView):
 
 class TestUserChatView(GenericAPIView):
     serializer_class = serializers.UserChatSerializer
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -52,6 +54,7 @@ class TestUserChatView(GenericAPIView):
 class UserChatView(ListAPIView):
     serializer_class = serializers.ChatListSerializer
     pagination_class = BasePageNumberPagination
+    permission_classes = (AllowAny,)
 
     def get_queryset(self):
         user_data = ChatService.get_or_set_user_jwt(
@@ -68,12 +71,13 @@ class UserChatView(ListAPIView):
 
 class MessageChatView(ListAPIView):
     serializer_class = serializers.MessageListSerializer
-    pagination_class = BaseCursorPagination
+    pagination_class = BasePageNumberPagination
+    permission_classes = (AllowAny,)
 
     # вот здесь должна быть правка о том, что именно определённые письма выводятся
     # пока хардкодим, смотрим на что-то подобное из блога
     def get_queryset(self):
-        return ChatService.get_messages_in_chat(chat=self.kwargs.get("chat_id")).order_by("id")
+        return ChatService.get_messages_in_chat(chat=self.kwargs.get("chat_id"))
 
     def get_template_name(self):
         return 'chat/includes/messages.html'

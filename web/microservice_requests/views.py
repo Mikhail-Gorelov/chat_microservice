@@ -5,7 +5,6 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from dj_rest_auth import views as auth_views
 from main.services import MainService
 from . import services
 from . import serializers
@@ -51,12 +50,6 @@ class CategoryChangeView(GenericAPIView):
         service = MainService(request=request, url=f'/categories/{slug}/')
         response = service.service_response(method="put", data=request.data)
         return Response(response.data)
-
-
-class LoginView(auth_views.LoginView):
-    serializer_class = serializers.LoginSerializer
-    # authentication_classes = (ExampleAuthentication,)
-    swagger_schema = None
 
 
 class ChatRegisterView(GenericAPIView):

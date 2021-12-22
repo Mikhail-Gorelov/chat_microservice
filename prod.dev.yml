@@ -7,15 +7,15 @@ x-variables: &variables
 
 services:
   nginx:
-    build:
-      context: .
-      dockerfile: docker/prod/nginx/Dockerfile
+#    build:
+#      context: .
+#      dockerfile: docker/prod/nginx/Dockerfile
     ports:
-      - 9000:9000
-  monitoring:
+      - "10000:10000"
+  web:
     environment:
       <<: *variables
-      SWAGGER_URL: http://localhost:9000
+      SWAGGER_URL: http://localhost:10000
   celery:
     command: celery -A src worker -l info -Q celery
     environment:

@@ -11,7 +11,7 @@ django-defender==0.9.1
 redis==3.5.3
 
 # for RestAPI
-djangorestframework==3.12.4
+djangorestframework==3.13.1
 drf-yasg==1.20.0 # Swagger
 
 
@@ -46,6 +46,8 @@ django-microservice-request==0.1.4.8
 
 # RangeFilter for admin
 django-admin-rangefilter==0.8.2
+
+python-json-logger==2.0.2
 
 # JsonValidator
 jsonschema==4.2.1

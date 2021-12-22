@@ -7,6 +7,11 @@ from .yasg import urlpatterns as swagger_url
 
 admin_url = settings.ADMIN_URL
 
+
+# def trigger_error(request):
+#     division_by_zero = 1 / 0
+
+
 urlpatterns = [
     path('', include('main.urls')),
     path('', include('chat.urls')),
@@ -15,6 +20,7 @@ urlpatterns = [
     path(f'{admin_url}/defender/', include('defender.urls')),
     path('api/', include('rest_framework.urls')),
     path('rosetta/', include('rosetta.urls')),
+    # path('sentry-debug/', trigger_error),
 ]
 
 urlpatterns += swagger_url
@@ -26,4 +32,5 @@ if settings.DEBUG:
         urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]
     if settings.ENABLE_DEBUG_TOOLBAR:
         from debug_toolbar import urls
+
         urlpatterns += [path('__debug__/', include(urls))]

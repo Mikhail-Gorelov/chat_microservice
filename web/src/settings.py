@@ -104,20 +104,21 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'microservice_request.permissions.HasApiKeyOrIsAuthenticated',
     ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-    ),
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ),
 }
 
 if ENABLE_RENDERING:
     """ For build CMS using DRF """
-    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.TemplateHTMLRenderer',
-    )
+REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
+    'rest_framework.renderers.JSONRenderer',
+    'rest_framework.renderers.TemplateHTMLRenderer',
+)
 
 ROOT_URLCONF = 'src.urls'
 
@@ -207,61 +208,61 @@ LANGUAGES = (
     ('en', _('English')),
 )
 
-SESSION_COOKIE_NAME = 'sessionid'
-CSRF_COOKIE_NAME = 'csrftoken'
+SESSION_COOKIE_NAME = 'sessionid_chat'
+CSRF_COOKIE_NAME = 'csrftoken_chat'
 
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = LANGUAGE_CODE
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'English'
 ROSETTA_SHOW_AT_ADMIN_PANEL = True
 ROSETTA_ENABLE_TRANSLATION_SUGGESTIONS = False
 
-if JAEGER_AGENT_HOST := os.environ.get('JAEGER_AGENT_HOST'):
-    from jaeger_client import Config
-    from jaeger_client.config import DEFAULT_REPORTING_PORT
-    from django_opentracing import DjangoTracing
+# if JAEGER_AGENT_HOST := os.environ.get('JAEGER_AGENT_HOST'):
+#     from jaeger_client import Config
+# from jaeger_client.config import DEFAULT_REPORTING_PORT
+# from django_opentracing import DjangoTracing
 
-    """If you don't need to trace all requests, comment middleware and set OPENTRACING_TRACE_ALL = False
-        More information https://github.com/opentracing-contrib/python-django/#tracing-individual-requests
-    """
-    MIDDLEWARE.insert(0, 'django_opentracing.OpenTracingMiddleware')
-    OPENTRACING_TRACE_ALL = True
-    tracer = Config(
-        config={
-            'sampler': {'type': 'const', 'param': 1},
-            'local_agent': {
-                'reporting_port': os.environ.get('JAEGER_AGENT_PORT', DEFAULT_REPORTING_PORT),
-                'reporting_host': JAEGER_AGENT_HOST,
-            },
-            'logging': int(os.environ.get('JAEGER_LOGGING', False)),
-        },
-        service_name=MICROSERVICE_TITLE,
-        validate=True,
-    ).initialize_tracer()
-    OPENTRACING_TRACING = DjangoTracing(tracer)
+"""If you don't need to trace all requests, comment middleware and set OPENTRACING_TRACE_ALL = False
+    More information https://github.com/opentracing-contrib/python-django/#tracing-individual-requests
+"""
+# MIDDLEWARE.insert(0, 'django_opentracing.OpenTracingMiddleware')
+# OPENTRACING_TRACE_ALL = True
+# tracer = Config(
+#     config={
+#         'sampler': {'type': 'const', 'param': 1},
+#         'local_agent': {
+#             'reporting_port': os.environ.get('JAEGER_AGENT_PORT', DEFAULT_REPORTING_PORT),
+#             'reporting_host': JAEGER_AGENT_HOST,
+#         },
+#         'logging': int(os.environ.get('JAEGER_LOGGING', False)),
+#     },
+#     service_name=MICROSERVICE_TITLE,
+#     validate=True,
+# ).initialize_tracer()
+# OPENTRACING_TRACING = DjangoTracing(tracer)
 
 if (SENTRY_DSN := os.environ.get('SENTRY_DSN')) and ENABLE_SENTRY:
     # More information on site https://sentry.io/
     from sentry_sdk import init
-    from sentry_sdk.integrations.django import DjangoIntegration
-    from sentry_sdk.integrations.redis import RedisIntegration
-    from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
 
-    init(
-        dsn=SENTRY_DSN,
-        integrations=[
-            DjangoIntegration(),
-            RedisIntegration(),
-            CeleryIntegration(),
-        ],
+init(
+    dsn=SENTRY_DSN,
+    integrations=[
+        DjangoIntegration(),
+        RedisIntegration(),
+        CeleryIntegration(),
+    ],
 
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
-        # We recommend adjusting this value in production.
-        traces_sample_rate=float(os.environ.get('SENTRY_TRACES_SAMPLE_RATE', '1.0')),
-        environment=os.environ.get('SENTRY_ENV', 'development'),
-        sample_rate=float(os.environ.get('SENTRY_SAMPLE_RATE', '1.0')),
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=float(os.environ.get('SENTRY_TRACES_SAMPLE_RATE', '1.0')),
+    environment=os.environ.get('SENTRY_ENV', 'development'),
+    sample_rate=float(os.environ.get('SENTRY_SAMPLE_RATE', '1.0')),
 
-        # If you wish to associate users to errors (assuming you are using
-        # django.contrib.auth) you may enable sending PII data.
-        send_default_pii=True
-    )
+    # If you wish to associate users to errors (assuming you are using
+    # django.contrib.auth) you may enable sending PII data.
+    send_default_pii=True
+)

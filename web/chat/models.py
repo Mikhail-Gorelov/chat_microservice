@@ -21,6 +21,9 @@ class Message(models.Model):
     author_id = models.PositiveIntegerField()
     author_status = models.IntegerField(choices=AuthorStatus.choices, default=AuthorStatus.OFFLINE)
 
+    class Meta:
+        ordering = ('-date',)
+
 
 class UserChat(models.Model):
     user_id = models.PositiveIntegerField()

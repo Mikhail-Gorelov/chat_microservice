@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from dj_rest_auth import serializers as auth_serializers
 from main.services import MainService
 
 
@@ -29,8 +28,3 @@ class PostCategoryInBlog(serializers.Serializer):
         service = MainService(request=self.context['request'], url='/categories/')
         response = service.service_response(method="post", data=self.validated_data)
         print(response.data)
-
-
-class LoginSerializer(auth_serializers.LoginSerializer):
-    username = None
-    password = serializers.CharField()

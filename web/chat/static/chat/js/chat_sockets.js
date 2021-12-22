@@ -22,33 +22,28 @@ function messageInChat(e) {
   }
   if (data.command == "add_chat") {
     console.log("added chat");
-    console.log("data");
+    console.log(data);
+    console.log(data.chat_id)
+    let chat = `
+    <div class="chat_list" id="${data.chat_id}">
+            <div class="chat_people">
+              <div class="chat_img"><img src="" alt="sunil"></div>
+              <div class="chat_ib">
+              </div>
+            </div>
+          </div>
+    `;
+    $('.inbox_chat').append(chat);
+    $(".chat_list").click(makeChatActive);
   }
   if (data.command == "new_message") {
     $('#chat-log').append(data.username + ": " + data.message + '\n');
     let currentUser = JSON.parse(localStorage.getItem('userData'));
     let message_list = data
-    if (message_list.author_id == currentUser.id) {
-      let message = `
-        <div class="outgoing_msg">
-        <div class="sent_msg">
-            <p>${message_list.content}</p>
-            <span class="time_date"> ${message_list.date}</span> </div>
-        </div>
-        `;
-      $('.msg_history').append(message);
+    if (message_list.author_id === currentUser[0]) {
+      outgoingMessage(message_list.content, message_list.date);
     } else {
-      let message = `
-        <div class="incoming_msg">
-        <div class="incoming_msg_img"><img src="${image}" alt="sunil" id="imageId"></div>
-        <div class="received_msg">
-          <div class="received_withd_msg">
-            <p>${message_list.content}</p>
-            <span class="time_date"> ${message_list.date}</span></div>
-        </div>
-        </div>
-        `;
-      $('.msg_history').append(message);
+      ingoingMessage(image, message_list.content, message_list.date);
     }
     $('.msg_history').scrollTop($('.msg_history').prop('scrollHeight'));
   }

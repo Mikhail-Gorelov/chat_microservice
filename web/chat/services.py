@@ -32,15 +32,14 @@ class ChatService:
 
     @staticmethod
     def create_chat(first_user: int, second_user: int):
-        return models.Chat.objects.create(
-                name="Chat with user " + str(first_user) + " and user " + str(second_user))
+        chat = models.Chat.objects.create(
+            name="Chat with user " + str(first_user) + " and user " + str(second_user))
+        models.UserChat.objects.bulk_create([
+            models.UserChat(user_id=first_user, chat=chat),
+            models.UserChat(user_id=second_user, chat=chat),
+        ])
 
-    @staticmethod
-    def create_user_chat(first_user: int, second_user: int, chat):
-        return models.UserChat.objects.bulk_create([
-                models.UserChat(user_id=first_user, chat=chat),
-                models.UserChat(user_id=second_user, chat=chat),
-            ])
+        return chat
 
     @staticmethod
     def filter_chat_by_two_users(first_user_id: int, second_user_id: int):

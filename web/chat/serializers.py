@@ -159,7 +159,6 @@ class ChatInitSerializer(serializers.Serializer):
         print(chat, "chat with users")
         if not chat.exists():
             new_chat = ChatService.create_chat(current_user.id, partner_user)
-            ChatService.create_user_chat(current_user.id, partner_user, new_chat)
             data = {
                 "type": "add.chat",
                 "data": {
@@ -168,7 +167,6 @@ class ChatInitSerializer(serializers.Serializer):
                 },
             }
             async_to_sync(get_channel_layer().group_send)(f"events_for_user_{self.validated_data['user_id']}", data)
-            # print("I am in save chat init", f"events_for_user_{self.validated_data['user_id']}")
         return self.user_data
 
 
