@@ -17,17 +17,7 @@ $('.msg_history').scroll(function () {
       requestedNewPageMessage = true;
       getMessagesInChat($(this).attr('id'), $(this).attr('href'), $(this).attr('data'));
     }
-    // if ($(this).attr("data-href")) {
-    //   requestedNewPageMessage = true;
-    //   getMessagesInChat($(this).attr('id'), $(this).attr('href'));
-    // }
   }
-  //   if ($(this).attr("data-href")) {
-  //     console.log("Hello world!");
-  //     requestedNewPageMessage = true;
-  //     // getMessagesInChat($(this).attr('id'), $(this).attr('href'));
-  //   }
-  // }
 });
 $(function () {
   getChatList();
@@ -131,10 +121,6 @@ function getMessagesInChat(id, image, url=null) {
       $.each(message_list, function (i) {
         let messageDate = new Date();
         convertTZ(messageDate, "Europe/Kiev");
-        let weekday = messageDate.getDay();
-        console.log(weekday);
-        let options = { weekday: 'long'};
-        console.log(new Intl.DateTimeFormat('en-US', options).format(messageDate));
         let messageDateStringToday = ("0" + messageDate.getDate()).slice(-2) + "-" + ("0"+(messageDate.getMonth()+1)).slice(-2) + "-" +
     messageDate.getFullYear();
         let messageDateStringYesterday = ("0" + (messageDate.getDate()-1)).slice(-2) + "-" + ("0"+(messageDate.getMonth()+1)).slice(-2) + "-" +
@@ -142,6 +128,7 @@ function getMessagesInChat(id, image, url=null) {
         let intermediateDate = ``;
         if (messageDateStringToday === (message_list[i].date).split(" ")[0]) {
           if (!$('div').hasClass("scroll-date-today")) {
+            console.log("Today!");
             let date = messageDateStringToday.split("-")[0] + "." + messageDateStringToday.split("-")[1]
             intermediateDate = `<div class="scroll-date-today" align="center"><p>Today ${date}</p></div>`;
           }
@@ -150,17 +137,21 @@ function getMessagesInChat(id, image, url=null) {
         if ((message_list[i].date).split(" ")[0] !== messageDateStringToday && (message_list[i].date).split(" ")[0] !== messageDateStringYesterday) {
           let id = (message_list[i].date).split(" ")[0]
           if (!$('div').hasClass("scroll-date-${id}")) {
+            // console.log($('div').hasClass("scroll-date-${id}"))
+            console.log("Date!");
             intermediateDate = `<div class="scroll-date-${id}" align="center"><p>${(message_list[i].date).split(" ")[0]}</p></div>`;
           }
         }
         if (messageDateStringYesterday === (message_list[i].date).split(" ")[0]) {
           if (!$('div').hasClass("scroll-date-yesterday")) {
+            console.log("Yesterday!");
             let date = messageDateStringYesterday.split("-")[0] + "." + messageDateStringYesterday.split("-")[1]
             intermediateDate = `<div class="scroll-date-yesterday" align="center"><p>Yesterday ${date}</p></div>`;
           }
         }
+        console.log(intermediateDate);
         let message = '';
-        $('.msg_history').append(intermediateDate);
+        $('.msg_history').prepend(intermediateDate);
         if (message_list[i].author_id === currentUser[0]) {
           message = outgoingMessage(message_list[i].content, message_list[i].date);
         } else {
@@ -171,13 +162,6 @@ function getMessagesInChat(id, image, url=null) {
       })
       $('.msg_history').attr('data', data.next);
       $('.msg_history').scrollTop($('.msg_history').prop('scrollHeight'));
-
-      // if (data.next !=null) {
-      //   return getMessagesInChat(id, image, data.next);
-      // }
-      // if (data.next == null) {
-      //   $('.msg_history').scrollTop($('.msg_history').prop('scrollHeight'));
-      // }
     },
 })
 }

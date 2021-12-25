@@ -40,11 +40,13 @@ function messageInChat(e) {
     $('#chat-log').append(data.username + ": " + data.message + '\n');
     let currentUser = JSON.parse(localStorage.getItem('userData'));
     let message_list = data
+    let message = '';
     if (message_list.author_id === currentUser[0]) {
-      outgoingMessage(message_list.content, message_list.date);
+      message = outgoingMessage(message_list.content, message_list.date);
     } else {
-      ingoingMessage(image, message_list.content, message_list.date);
+      message = ingoingMessage(image, message_list.content, message_list.date);
     }
+    $('.msg_history').append(message);
     $('.msg_history').scrollTop($('.msg_history').prop('scrollHeight'));
   }
 }
