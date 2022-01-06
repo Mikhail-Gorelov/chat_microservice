@@ -7,6 +7,7 @@ python manage.py check --deploy
 python manage.py migrate
 python manage.py collectstatic --no-input
 
-gunicorn src.asgi:application
+#gunicorn src.asgi:application
+daphne -b 0.0.0.0 -p 8002 src.asgi:application
 
 exec "$@"
