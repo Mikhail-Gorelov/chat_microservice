@@ -3,7 +3,7 @@ $(function () {
 });
 
 chat = new ReconnectingWebSocket(
-  'ws://'
+  'wss://'
   + window.location.host
   + '/ws/chat/'
 );
