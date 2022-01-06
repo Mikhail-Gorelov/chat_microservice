@@ -2,7 +2,7 @@ $(function () {
   $(".msg_send_btn").click(sendMessage);
 });
 
-chat = new WebSocket(
+chat = new ReconnectingWebSocket(
   'wss://'
   + window.location.host
   + '/ws/chat/'
