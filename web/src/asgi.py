@@ -17,7 +17,7 @@ from channels.security.websocket import OriginValidator
 from chat.routing import websocket_urlpatterns as chat_urlpatterns
 
 application = ProtocolTypeRouter({
-    "http": django_asgi_app,
+    "https": django_asgi_app,
     'websocket': AuthMiddlewareStack(
         URLRouter(
             chat_urlpatterns,
