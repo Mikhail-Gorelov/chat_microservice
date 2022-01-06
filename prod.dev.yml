@@ -12,7 +12,7 @@ services:
 #      dockerfile: docker/prod/nginx/Dockerfile
     ports:
       - "10000:10000"
-  web:
+  chat:
     environment:
       <<: *variables
       SWAGGER_URL: http://localhost:10000

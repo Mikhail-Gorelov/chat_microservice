@@ -16,7 +16,7 @@ services:
       # variable names are space-separated
       ENVSUBST_VARS: APP
       APP: your.domain.com
-  web:
+  chat:
     environment:
       USE_HTTPS: 1
 
