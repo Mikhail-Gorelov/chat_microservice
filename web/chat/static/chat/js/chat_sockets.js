@@ -2,8 +2,10 @@ $(function () {
   $(".msg_send_btn").click(sendMessage);
 });
 
+const ws_scheme = window.location.protocol === "https:" ? "wss://" : "ws://";
+
 chat = new ReconnectingWebSocket(
-  'wss://'
+  ws_scheme
   + window.location.host
   + '/ws/chat/'
 );
