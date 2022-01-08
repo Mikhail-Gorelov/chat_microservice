@@ -8,6 +8,6 @@ python manage.py migrate
 python manage.py collectstatic --no-input
 
 #gunicorn src.asgi:application
-daphne -b 0.0.0.0 -p 8002 src.asgi:application
+daphne -b 0.0.0.0 -p 8000 src.asgi:application
 
 exec "$@"
