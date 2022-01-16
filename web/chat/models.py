@@ -31,5 +31,11 @@ class UserChat(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=('user_id', 'chat',), name='Unique user in chat')
+            models.UniqueConstraint(
+                fields=(
+                    'user_id',
+                    'chat',
+                ),
+                name='Unique user in chat',
+            )
         ]

@@ -13,7 +13,6 @@ locmem_cache = override_settings(CACHES=CACHES)
 
 
 class DecoratorTest(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(email='test111@test.com', password='test_test_test')

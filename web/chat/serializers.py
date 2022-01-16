@@ -78,7 +78,6 @@ class ChatSerializer(serializers.Serializer):
 
 
 class UserChatShortSerializer(serializers.ModelSerializer):
-
     def to_representation(self, instance):
         to_repr = super().to_representation(instance)
         output_list = list()
@@ -112,7 +111,16 @@ class ChatListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Chat
         fields = (
-            "id", "name", "description", "status", "date", "file", "last_message", "last_message_date", "user_chats")
+            "id",
+            "name",
+            "description",
+            "status",
+            "date",
+            "file",
+            "last_message",
+            "last_message_date",
+            "user_chats",
+        )
 
 
 class ChatSerializerCheck(serializers.ModelSerializer):
@@ -166,7 +174,9 @@ class ChatInitSerializer(serializers.Serializer):
                     'user': current_user._asdict(),
                 },
             }
-            async_to_sync(get_channel_layer().group_send)(f"events_for_user_{self.validated_data['user_id']}", data)
+            async_to_sync(get_channel_layer().group_send)(
+                f"events_for_user_{self.validated_data['user_id']}", data
+            )
         return self.user_data
 
 

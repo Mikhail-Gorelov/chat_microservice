@@ -57,9 +57,7 @@ class UserChatView(ListAPIView):
     permission_classes = (AllowAny,)
 
     def get_queryset(self):
-        user_data = ChatService.get_or_set_user_jwt(
-            self.request.COOKIES.get(settings.JWT_COOKIE_NAME)
-        )
+        user_data = ChatService.get_or_set_user_jwt(self.request.COOKIES.get(settings.JWT_COOKIE_NAME))
         self.user = UserData(**user_data)
         return ChatService.get_last_message_from_chat(user_id=self.user.id)
 

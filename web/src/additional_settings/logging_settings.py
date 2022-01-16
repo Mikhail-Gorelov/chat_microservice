@@ -6,12 +6,8 @@ LOGGING = {
     "disable_existing_loggers": False,
     "root": {"level": "INFO", "handlers": ["default"]},
     "formatters": {
-        "simple": {
-            "format": "%(levelname)s %(message)s"
-        },
-        "verbose": {
-            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
-        },
+        "simple": {"format": "%(levelname)s %(message)s"},
+        "verbose": {"format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"},
         "django.server": {
             "()": "django.utils.log.ServerFormatter",
             "format": "[{server_time}] {message}",
@@ -44,15 +40,11 @@ LOGGING = {
         },
     },
     "loggers": {
-        "django": {
-            "level": "INFO",
-            "propagate": True
-        },
+        "django": {"level": "INFO", "propagate": True},
         "django.server": {
             "handlers": ["django.server"],
             "level": "INFO",
             "propagate": False,
         },
     },
-
 }

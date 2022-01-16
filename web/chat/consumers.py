@@ -13,7 +13,6 @@ def parse_query_string(query_string):
 
 
 class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
-
     @database_sync_to_async
     def check_chat_status(self, room_name):
         try:
@@ -36,8 +35,9 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         await self.accept()
 
     async def init_user_chat(self):
-        chat_list: list[ChatDataId] = [ChatDataId(data) for data in
-                                       await AsyncChatService.get_chat_list(self.user['id'])]
+        chat_list: list[ChatDataId] = [
+            ChatDataId(data) for data in await AsyncChatService.get_chat_list(self.user['id'])
+        ]
         await self.channel_layer.group_add(f"events_for_user_{self.user['id']}", self.channel_name)
         # print(f"events_for_user_{self.user['id']}")
         for chat in chat_list:
@@ -60,14 +60,18 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def create_message(self, content, chat_id):
-        return models.Message.objects.create(content=content, chat=models.Chat.objects.get(id=chat_id),
-                                             author_id=self.user['id'])
+        return models.Message.objects.create(
+            content=content, chat=models.Chat.objects.get(id=chat_id), author_id=self.user['id']
+        )
 
     async def new_message(self, data):
-        await self.channel_layer.group_send(data.get('chat_id'), {
-            "type": "chat.message",
-            "data": data,
-        })
+        await self.channel_layer.group_send(
+            data.get('chat_id'),
+            {
+                "type": "chat.message",
+                "data": data,
+            },
+        )
         await self.create_message(data.get("message"), data.get('chat_id'))
 
     async def chat_message(self, event: dict):

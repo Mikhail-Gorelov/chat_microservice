@@ -17,7 +17,9 @@ def cached_function_result(timeout=300):
             result = function(*args, **kwargs)
             cache.set(function.__name__, result, timeout=timeout)
             return result
+
         return wrapper
+
     return decorator
 
 
@@ -25,6 +27,7 @@ def execution_time(stdout: str = 'console'):
     """
     :param stdout: 'console' or 'tuple'
     """
+
     def decorator(func) -> object:
         def delta_time(*args, **kwargs):
             t1 = default_timer()
@@ -37,7 +40,9 @@ def execution_time(stdout: str = 'console'):
             elif stdout == 'tuple':
                 return data, delta
             return data
+
         return delta_time
+
     return decorator
 
 
@@ -49,7 +54,9 @@ def except_shell(errors=(Exception,), default_value=''):
             except errors as e:
                 logging.error(e)
                 return default_value or None
+
         return new_func
+
     return decorator
 
 

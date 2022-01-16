@@ -19,3 +19,6 @@ vulture==2.3
 # Debug Toolbar
 django-debug-toolbar==3.2.2
 django-debug-toolbar-request-history==0.1.4
+
+# Black
+black==21.12b0

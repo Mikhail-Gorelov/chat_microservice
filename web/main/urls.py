@@ -5,5 +5,4 @@ from .views import SetUserTimeZone, TemplateAPIView
 
 urlpatterns = [
     path('timezone/', SetUserTimeZone.as_view(), name='set_user_timezone'),
-
 ]

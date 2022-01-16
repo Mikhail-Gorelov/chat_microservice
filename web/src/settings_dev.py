@@ -19,7 +19,6 @@ if ENABLE_DEBUG_TOOLBAR:
         'ddt_request_history.panels.request_history.RequestHistoryPanel',
         "debug_toolbar.panels.timer.TimerPanel",
         'debug_toolbar.panels.settings.SettingsPanel',
-
         "debug_toolbar.panels.headers.HeadersPanel",
         "debug_toolbar.panels.request.RequestPanel",
         "debug_toolbar.panels.sql.SQLPanel",

@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 
+
 class CategoriesListView(GenericAPIView):
     serializer_class = serializers.PostCategoryInBlog
     permission_classes = (AllowAny,)

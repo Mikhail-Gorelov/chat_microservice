@@ -24,7 +24,6 @@ class AsyncChatService:
 
 
 class ChatService:
-
     @staticmethod
     def add_users_to_chat(users: list, chat):
         objs = (models.UserChat(user_id=user, chat=chat) for user in users)
@@ -33,18 +32,22 @@ class ChatService:
     @staticmethod
     def create_chat(first_user: int, second_user: int):
         chat = models.Chat.objects.create(
-            name="Chat with user " + str(first_user) + " and user " + str(second_user))
-        models.UserChat.objects.bulk_create([
-            models.UserChat(user_id=first_user, chat=chat),
-            models.UserChat(user_id=second_user, chat=chat),
-        ])
+            name="Chat with user " + str(first_user) + " and user " + str(second_user)
+        )
+        models.UserChat.objects.bulk_create(
+            [
+                models.UserChat(user_id=first_user, chat=chat),
+                models.UserChat(user_id=second_user, chat=chat),
+            ]
+        )
 
         return chat
 
     @staticmethod
     def filter_chat_by_two_users(first_user_id: int, second_user_id: int):
         return models.Chat.objects.filter(user_chats__user_id=first_user_id).filter(
-            user_chats__user_id=second_user_id)
+            user_chats__user_id=second_user_id
+        )
 
     @staticmethod
     def get_chat_list(user_id: int):
@@ -88,8 +91,10 @@ class ChatService:
     def get_chat_contacts(user_id: int) -> list[int]:
         user_chats = models.Chat.objects.filter(user_chats__user_id=user_id)
         users_id: list[int] = list(
-            models.UserChat.objects.exclude(
-                user_id=user_id).filter(chat__in=user_chats).values_list('user_id', flat=True).distinct()
+            models.UserChat.objects.exclude(user_id=user_id)
+            .filter(chat__in=user_chats)
+            .values_list('user_id', flat=True)
+            .distinct()
         )
         return users_id
 
@@ -105,8 +110,9 @@ class ChatService:
             else:
                 users_data.append(cache.get(cache_key))
         if users_list:
-            response_data: list[Union[dict[str, Any], OrderedDict[str, Any]]] = ChatService.get_users_information(
-                data=users_list, request=request)
+            response_data: list[
+                Union[dict[str, Any], OrderedDict[str, Any]]
+            ] = ChatService.get_users_information(data=users_list, request=request)
             for user in response_data:
                 cache_key = cache.make_key('user', user['id'])
                 cache.set(cache_key, user, timeout=600)

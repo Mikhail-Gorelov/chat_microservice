@@ -1,8 +1,8 @@
 name: Main
 
 env:
-  APP_NAME: "Template"
-  PROJECT_PATH: "/home/ubuntu/template/"
+  APP_NAME: "Chat"
+  PROJECT_PATH: "/home/ubuntu/chat/"
 
 on:
   # Allows you to run this workflow manually from the Actions tab
@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install SSH Key
-        uses: shimataro/ssh-key-action@v2
+        uses: shimataro/ssh-key-action@v2.3.1
         with:
           key: ${{ secrets.AWS_PEM }}
           known_hosts: 'empty'

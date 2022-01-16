@@ -13,10 +13,7 @@ class ExampleAuthentication(authentication.BaseAuthentication):
         if not username or not password:
             raise exceptions.AuthenticationFailed('No credentials provided.')
 
-        credentials = {
-            get_user_model().USERNAME_FIELD: username,
-            'password': password
-        }
+        credentials = {get_user_model().USERNAME_FIELD: username, 'password': password}
 
         user = authenticate(**credentials)
 
