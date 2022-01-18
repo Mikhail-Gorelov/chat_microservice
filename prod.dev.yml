@@ -2,7 +2,6 @@ version: '3.7'
 
 x-variables: &variables
   ENV_STAGE: dev
-  DEBUG: 1
   USE_HTTPS: 0
 
 services:
@@ -15,7 +14,6 @@ services:
   chat:
     environment:
       <<: *variables
-      SWAGGER_URL: http://localhost:10000
   celery:
     command: celery -A src worker -l info -Q celery
     environment:
