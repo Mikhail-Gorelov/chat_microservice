@@ -15,14 +15,17 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from chat.middleware import AuthMiddlewareStack
 from channels.security.websocket import OriginValidator
 from chat.routing import websocket_urlpatterns as chat_urlpatterns
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 
-application = ProtocolTypeRouter(
-    {
-        "http": django_asgi_app,
-        'websocket': AuthMiddlewareStack(
-            URLRouter(
-                chat_urlpatterns,
-            )
-        ),
-    }
+application = SentryAsgiMiddleware(
+    ProtocolTypeRouter(
+        {
+            "http": django_asgi_app,
+            'websocket': AuthMiddlewareStack(
+                URLRouter(
+                    chat_urlpatterns,
+                )
+            ),
+        }
+    )
 )
