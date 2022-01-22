@@ -7,10 +7,10 @@ class CookieAuthMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        user_jwt = scope['cookies'].get('jwt-auth')
-        if not user_jwt:
-            return
-        scope['user'] = await AsyncChatService.get_user(user_jwt)
+        # user_jwt = scope['cookies'].get('jwt-auth')
+        # if not user_jwt:
+        #     return
+        # scope['user'] = await AsyncChatService.get_user(user_jwt)
         return await self.app(scope, receive, send)
 
 
