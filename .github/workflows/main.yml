@@ -86,11 +86,9 @@ jobs:
             cd ${{ env.PROJECT_PATH }}
             export DOCKER_REGISTRY=$DOCKER_REGISTRY
             export DOCKER_TAG=$DOCKER_RELEASE_IMAGE
-            docker-compose -f prod.yml stop chat celery nginx
-            docker-compose -f prod.yml rm -f
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
             docker-compose -f prod.yml pull
-            docker-compose -f prod.yml up -d
+            docker-compose -f prod.yml up -d --build
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USER }}
           privateKey: ${{ secrets.AWS_PEM }}
