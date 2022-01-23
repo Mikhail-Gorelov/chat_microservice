@@ -1,5 +1,6 @@
 from django.conf import settings
-from microservice_request.services import MicroServiceConnect, ConnectionService
+from microservice_request.services import ConnectionService, MicroServiceConnect
+
 from . import models
 
 

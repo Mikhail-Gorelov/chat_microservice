@@ -1,7 +1,7 @@
 import os
 
-from django.core.asgi import get_asgi_application
 from django.conf import settings
+from django.core.asgi import get_asgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'src.settings')
 django_asgi_app = get_asgi_application()
@@ -12,10 +12,11 @@ django.core.exceptions.AppRegistryNotReady: Apps aren't loaded yet.
 """
 
 from channels.routing import ProtocolTypeRouter, URLRouter
-from chat.middleware import AuthMiddlewareStack
 from channels.security.websocket import OriginValidator
-from chat.routing import websocket_urlpatterns as chat_urlpatterns
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+
+from chat.middleware import AuthMiddlewareStack
+from chat.routing import websocket_urlpatterns as chat_urlpatterns
 
 application = SentryAsgiMiddleware(
     ProtocolTypeRouter(

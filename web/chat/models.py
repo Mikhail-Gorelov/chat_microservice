@@ -1,7 +1,8 @@
-from django.db import models
 from uuid import uuid4
 
-from chat.choices import ChatStatus, AuthorStatus
+from django.db import models
+
+from chat.choices import AuthorStatus, ChatStatus
 
 
 class Chat(models.Model):

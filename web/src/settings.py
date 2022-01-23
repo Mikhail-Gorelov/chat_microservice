@@ -2,11 +2,11 @@ import os
 
 from django.utils.translation import gettext_lazy as _
 
-from .additional_settings.defender_settings import *
-from .additional_settings.swagger_settings import *
 from .additional_settings.cacheops_settings import *
-from .additional_settings.logging_settings import *
 from .additional_settings.celery_settings import *
+from .additional_settings.defender_settings import *
+from .additional_settings.logging_settings import *
+from .additional_settings.swagger_settings import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -233,9 +233,9 @@ ROSETTA_ENABLE_TRANSLATION_SUGGESTIONS = False
 if (SENTRY_DSN := os.environ.get('SENTRY_DSN')) and ENABLE_SENTRY:
     # More information on site https://sentry.io/
     from sentry_sdk import init
+    from sentry_sdk.integrations.celery import CeleryIntegration
     from sentry_sdk.integrations.django import DjangoIntegration
     from sentry_sdk.integrations.redis import RedisIntegration
-    from sentry_sdk.integrations.celery import CeleryIntegration
 
     init(
         dsn=SENTRY_DSN,

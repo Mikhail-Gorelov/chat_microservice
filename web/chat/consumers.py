@@ -1,11 +1,14 @@
+from urllib.parse import parse_qs
+
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from main.models import UserData, ChatDataId
-from main.services import MainService
-from . import models, serializers
-from urllib.parse import parse_qs
 from django.core.cache import cache
-from .services import ChatService, AsyncChatService
+
+from main.models import ChatDataId, UserData
+from main.services import MainService
+
+from . import models, serializers
+from .services import AsyncChatService, ChatService
 
 
 def parse_query_string(query_string):

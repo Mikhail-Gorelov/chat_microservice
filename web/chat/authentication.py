@@ -1,7 +1,6 @@
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import User
-from rest_framework import authentication
-from rest_framework import exceptions
+from rest_framework import authentication, exceptions
 
 
 class ExampleAuthentication(authentication.BaseAuthentication):

@@ -1,8 +1,10 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.utils.translation import gettext_lazy as _
 from typing import NamedTuple
 from uuid import uuid4
+
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
 from .managers import UserManager
 
 

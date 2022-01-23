@@ -1,7 +1,9 @@
 from django.urls import path
-from rest_framework.routers import DefaultRouter
-from main.views import TemplateAPIView
 from django.views.decorators.cache import cache_page
+from rest_framework.routers import DefaultRouter
+
+from main.views import TemplateAPIView
+
 from . import views
 
 app_name = 'chat'

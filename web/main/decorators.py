@@ -1,10 +1,12 @@
 import logging
-from django.core.cache import cache
-from requests.exceptions import RequestException
-from kombu.exceptions import OperationalError
-from celery.exceptions import TimeoutError
-from timeit import default_timer
 from smtplib import SMTPRecipientsRefused
+from timeit import default_timer
+
+from django.core.cache import cache
+from kombu.exceptions import OperationalError
+from requests.exceptions import RequestException
+
+from celery.exceptions import TimeoutError
 
 logger = logging.getLogger(__name__)
 

@@ -1,15 +1,18 @@
-from rest_framework import serializers
-from main.utils import find_dict_in_list
-from main.models import UserData
 import datetime
 from datetime import timedelta
-from django.contrib.auth import get_user_model
-from . import models, services
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from main.services import MainService
-from .services import ChatService
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
 from rest_framework.status import HTTP_400_BAD_REQUEST
+
+from main.models import UserData
+from main.services import MainService
+from main.utils import find_dict_in_list
+
+from . import models, services
+from .services import ChatService
 
 User = get_user_model()
 

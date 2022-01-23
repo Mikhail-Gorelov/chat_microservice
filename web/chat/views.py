@@ -1,22 +1,24 @@
 import logging
+
 from django.conf import settings
+from django.core.cache import cache
 from django.shortcuts import render
 from pyparsing import unicode
+from rest_framework import status, viewsets
+from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from main.pagination import BasePageNumberPagination, BaseCursorPagination
+
 from chat.models import Message
+from main.models import UserData
+from main.pagination import BaseCursorPagination, BasePageNumberPagination
 from main.services import MainService
+
+from . import models, serializers
 from .authentication import ExampleAuthentication
 from .serializers import ChatInitSerializer, ChatShortInfoSerializer
 from .services import ChatService
-from rest_framework.generics import ListAPIView, GenericAPIView
-from . import serializers
-from rest_framework import viewsets, status
-from django.core.cache import cache
-from . import models
-from main.models import UserData
 
 logger = logging.getLogger(__name__)
 
