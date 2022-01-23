@@ -28,3 +28,11 @@ mypy==0.931
 django-stubs==1.9.0
 djangorestframework-stubs==1.4.0
 isort==5.10.1
+
+# Stubs for mypy linter
+django-stubs==1.9.0
+django-filter-stubs==0.1.1
+djangorestframework-stubs==1.4.0
+drf-yasg-stubs==0.1.4
+celery-types==0.10.0
+types-requests==2.27.7

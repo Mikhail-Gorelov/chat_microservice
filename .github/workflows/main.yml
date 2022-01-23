@@ -27,7 +27,7 @@ jobs:
       - name: flake8
         run: docker-compose run --entrypoint="" chat flake8 .
       - name: isort test
-        run: docker-compose run --entrypoint="" web isort . --check
+        run: docker-compose run --entrypoint="" chat isort . --check
       - name: black test
         run: docker-compose run --entrypoint="" chat black . --check
       - name: Migration check
