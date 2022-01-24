@@ -4,6 +4,8 @@ services:
   nginx:
     build:
       context: .
+      cache_from:
+        - mushroom3/django-chat-nginx:${DOCKER_TAG:-latest}
       dockerfile: docker/prod/nginx/Dockerfile
     image: mushroom3/django-chat-nginx:${DOCKER_TAG:-latest}
     volumes:
@@ -24,6 +26,8 @@ services:
   chat:
     build:
       context: .
+      cache_from:
+        - mushroom3/django-chat:${DOCKER_TAG:-latest}
       dockerfile: docker/prod/web/Dockerfile
     image: mushroom3/django-chat:${DOCKER_TAG:-latest}
     entrypoint: /entrypoint.sh
@@ -58,6 +62,8 @@ services:
   celery:
     build:
       context: .
+      cache_from:
+        - mushroom3/django-chat:${DOCKER_TAG:-latest}
       dockerfile: docker/prod/web/Dockerfile
     image: mushroom3/django-chat:${DOCKER_TAG:-latest}
     command: celery -A src worker -l info
@@ -76,6 +82,8 @@ services:
   db:
     build:
       context: .
+      cache_from:
+      - mushroom3/django-chat-db:${DOCKER_TAG:-latest}
       dockerfile: docker/prod/db/Dockerfile
     image: mushroom3/django-chat-db:${DOCKER_TAG:-latest}
     volumes:
@@ -94,6 +102,8 @@ services:
   redis:
     build:
       context: .
+      cache_from:
+        - mushroom3/django-chat-redis:${DOCKER_TAG:-latest}
       dockerfile: docker/prod/redis/Dockerfile
     image: mushroom3/django-chat-redis:${DOCKER_TAG:-latest}
     restart: always

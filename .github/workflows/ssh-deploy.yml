@@ -43,7 +43,7 @@ jobs:
         with:
           command: |
             cd ${{ env.PROJECT_PATH }}
-            docker-compose -f prod.yml -f prod.dev.yml --target builder --cache-from mushroom3/django-chat --cache-from mushroom3/django-chat-redis --cache-from mushroom3/django-chat-db --cache-from mushroom3/django-chat-nginx up -d --build
+            docker-compose -f prod.yml -f prod.dev.yml up -d --build
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USER }}
           privateKey: ${{ secrets.AWS_PEM}}
