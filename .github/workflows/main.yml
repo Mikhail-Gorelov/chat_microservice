@@ -61,7 +61,7 @@ jobs:
 
       - name: Build the Docker image
         id: docker_build
-        run: docker-compose -f prod.yml build --pull
+        run: docker-compose -f prod.yml  --target builder --cache-from mushroom3/django-chat --cache-from mushroom3/django-chat-redis --cache-from mushroom3/django-chat-db --cache-from mushroom3/django-chat-nginx build --pull
 
       - name: Push to Docker hub
         run: docker-compose -f prod.yml push
