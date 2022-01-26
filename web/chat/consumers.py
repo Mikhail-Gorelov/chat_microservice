@@ -33,9 +33,9 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         return list(serializer.data)
 
     async def connect(self):
-        # self.user = self.scope['user']
-        self.user = None
-        # await self.init_user_chat()
+        self.user = self.scope['user']
+        # self.user = None
+        await self.init_user_chat()
         await self.accept()
 
     async def init_user_chat(self):
