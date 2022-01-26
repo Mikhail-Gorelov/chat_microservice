@@ -88,7 +88,7 @@ jobs:
             export DOCKER_TAG=$DOCKER_RELEASE_IMAGE
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
             docker-compose -f prod.yml pull
-            docker-compose -f prod.yml up -d --build
+            docker-compose -f prod.yml up -d
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USER }}
           privateKey: ${{ secrets.AWS_PEM }}
