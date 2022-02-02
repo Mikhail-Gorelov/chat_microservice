@@ -1,5 +1,5 @@
 import logging
-
+import redis
 from django.conf import settings
 from django.core.cache import cache
 from django.shortcuts import render
@@ -19,8 +19,105 @@ from . import models, serializers
 from .authentication import ExampleAuthentication
 from .serializers import ChatInitSerializer, ChatShortInfoSerializer
 from .services import ChatService
+from rest_framework.decorators import api_view
+import json
 
 logger = logging.getLogger(__name__)
+
+redis_instance = redis.StrictRedis(host='redis', port='6379', db=0)
+
+
+# проблемы с подключение, нужно понять как подключать/ подключить бд через настройки
+
+
+class ManageRedisItems(GenericAPIView):
+    serializer_class = serializers.RedisSerializer
+
+    def get(self, request):
+        items = {}
+        count = 0
+        for key in redis_instance.keys("*"):
+            items[key.decode("utf-8")] = redis_instance.get(key)
+            count += 1
+        response = {
+            'count': count,
+            'msg': f"Found {count} items.",
+            'items': items
+        }
+        return Response(response, status=200)
+
+    def post(self, request):
+        item = self.get_serializer(data=request.data)
+        item.is_valid(raise_exception=True)
+        item.save()
+        key = item.data['key']
+        value = item.data['value']
+        redis_instance.set(key, value)
+        response = {
+            'msg': f"{key} successfully set to {value}"
+        }
+        return Response(response, 201)
+
+
+class ManageRedisItem(GenericAPIView):
+    serializer_class = serializers.RedisSerializer
+
+    def get(self, request, **kwargs):
+        if kwargs['key']:
+            value = redis_instance.get(kwargs['key'])
+            if value:
+                response = {
+                    'key': kwargs['key'],
+                    'value': value,
+                    'msg': 'success'
+                }
+                return Response(response, status=200)
+            else:
+                response = {
+                    'key': kwargs['key'],
+                    'value': None,
+                    'msg': 'Not found'
+                }
+                return Response(response, status=404)
+
+    def put(self, request, **kwargs):
+        if kwargs['key']:
+            item = serializers.RedisUpdateSerializer(data=request.data)
+            item.is_valid(raise_exception=True)
+            item.save()
+            new_value = item.data['value']
+            value = redis_instance.get(kwargs['key'])
+            if value:
+                redis_instance.set(kwargs['key'], new_value)
+                response = {
+                    'key': kwargs['key'],
+                    'value': value,
+                    'msg': f"Successfully updated {kwargs['key']}"
+                }
+                return Response(response, status=200)
+            else:
+                response = {
+                    'key': kwargs['key'],
+                    'value': None,
+                    'msg': 'Not found'
+                }
+                return Response(response, status=404)
+
+    def delete(self, request, **kwargs):
+        if kwargs['key']:
+            result = redis_instance.delete(kwargs['key'])
+            if result == 1:
+                response = {
+                    'msg': f"{kwargs['key']} successfully deleted"
+                }
+                return Response(response, status=404)
+            else:
+                response = {
+                    'key': kwargs['key'],
+                    'value': None,
+                    'msg': 'Not found'
+                }
+                return Response(response, status=404)
 
 
 class LastMessagesView(ListAPIView):

@@ -1,6 +1,7 @@
 from django.urls import path
 from django.views.decorators.cache import cache_page
 from rest_framework.routers import DefaultRouter
+from rest_framework.urlpatterns import format_suffix_patterns
 
 from main.views import TemplateAPIView
 
@@ -21,6 +22,8 @@ urlpatterns = [
     path('message-last/<chat_id>/', views.LastChatMessage.as_view(), name="message-list"),
     path('init/', views.ChatInitView.as_view(), name="index"),
     path('short-info/', views.ChatShortInfoView.as_view(), name='short-info'),
+    path('manage-items/', views.ManageRedisItems.as_view(), name="items"),
+    path('manage-items/<slug:key>', views.ManageRedisItem.as_view(), name="single_item")
 ]
 
 urlpatterns += router.urls

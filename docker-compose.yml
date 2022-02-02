@@ -14,7 +14,7 @@ services:
       - redis_socket:/redis_socket
       - postgres_socket:/postgres_socket
     ports:
-      - 8010:8000
+      - "8010:8000"
     environment:
       <<: *variables
     env_file:
@@ -46,8 +46,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
       - postgres_socket:/postgres_socket
-    ports:
-      - 5431:5432
+#    ports:
+#      - 5431:5432
     env_file:
       - docker/dev/env/.db.env
     networks:

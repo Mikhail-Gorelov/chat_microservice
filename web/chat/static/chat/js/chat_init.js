@@ -10,6 +10,7 @@ function initChat() {
     type: "POST",
     data: params,
     success: function (data) {
+      // TODO: здесь не проходит success, из-за этого не сетится юзер и тд (скрипт не подбирается)
       console.log("success", data);
       localStorage.setItem('userData', JSON.stringify(data));
       window.location.href = '/'

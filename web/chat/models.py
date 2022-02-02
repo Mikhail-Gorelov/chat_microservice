@@ -13,6 +13,9 @@ class Chat(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     file = models.ImageField(upload_to="file_storage/")
 
+    def count_unread_messages(self):
+        return self.messages.aggregate(count=models.Count("has_read", filter=models.Q(has_read=False)))
+
 
 class Message(models.Model):
     content = models.TextField(max_length=200)
@@ -20,7 +23,7 @@ class Message(models.Model):
     objects = models.Manager()
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, null=True, related_name='messages')
     author_id = models.PositiveIntegerField()
-    author_status = models.IntegerField(choices=AuthorStatus.choices, default=AuthorStatus.OFFLINE)
+    has_read = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('-date',)

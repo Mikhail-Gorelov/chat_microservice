@@ -69,6 +69,47 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         )
 
     async def new_message(self, data):
+        message = await self.create_message(data.get("message"), data.get("chat_id"))
+        data_template = await self.response_template(
+            chat_id=data.get("chat_id"),
+            message_id=message.pk,
+            author_id=message.author_id,
+            content=message.content,
+            date=str(message.date),
+            has_read=message.has_read
+        )
+        data["has_read"] = message.has_read
+        message_count: dict = await database_sync_to_async(message.chat.count_unread_messages)()
+        data["count_unread"] = message_count["count"]
+        await self.channel_layer.group_send(
+            data.get("chat_id"),
+            {
+                "type": "chat.message",
+                "data": data,
+            },
+        )
+
+    async def response_template(self, **kwargs) -> dict:
+        return {
+            "type": "chat.message",
+            "chat_id": kwargs["chat_id"],
+            "data": {
+                "message_id": kwargs.get("message_id"),
+                "author_id": kwargs.get("author_id"),
+                "content": kwargs.get("content"),
+                "date": kwargs.get("date"),
+                "has_read": kwargs.get("has_read"),
+            }
+        }
+
+    @database_sync_to_async
+    def check_message_db(self, message_id):
+        message = models.Message.objects.get(pk=message_id)
+        message.has_read = True
+        message.save()
+        return message
+
+    async def check_message(self, data):
         await self.channel_layer.group_send(
             data.get('chat_id'),
             {
@@ -76,7 +117,7 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
                 "data": data,
             },
         )
-        await self.create_message(data.get("message"), data.get('chat_id'))
+        await self.check_message_db(data.get("message_id"))
 
     async def chat_message(self, event: dict):
         data = event.get("data")
@@ -89,7 +130,7 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
 
     commands = {
         "new_message": new_message,
-        "check_online_users": connect,
+        "check_message": check_message,
     }
 
     async def receive_json(self, content: dict, **kwargs):

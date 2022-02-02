@@ -137,7 +137,7 @@ class MessageListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Message
-        fields = ("content", "date", "chat", "author_status", "author_id")
+        fields = ("id", "has_read", "content", "date", "chat", "author_id")
 
     # TODO: Продумать более хитрую валидацию, чтобы работало
     def validate(self, data):
@@ -189,3 +189,18 @@ class ChatShortInfoSerializer(serializers.Serializer):
     def create(self, validated_data):
         print(validated_data)
         return ChatService.get_users_information(data=validated_data, request=self.context['request'])
+
+
+class RedisSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    value = serializers.CharField()
+
+    def create(self, validated_data):
+        return validated_data
+
+
+class RedisUpdateSerializer(serializers.Serializer):
+    value = serializers.CharField()
+
+    def create(self, validated_data):
+        return validated_data

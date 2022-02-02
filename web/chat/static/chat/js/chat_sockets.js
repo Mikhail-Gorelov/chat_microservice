@@ -1,4 +1,5 @@
 $(function () {
+  // TODO: типо стандартная инициализация, нужно иначе вероятно её делать
   $(".msg_send_btn").click(sendMessage);
 });
 
@@ -28,17 +29,23 @@ function messageInChat(e) {
     console.log(data.chat_id)
     let chat = `
     <div class="chat_list" id="${data.chat_id}">
-            <div class="chat_people">
-              <div class="chat_img"><img src="" alt="sunil"></div>
-              <div class="chat_ib">
-              </div>
-            </div>
+            <li class="clearfix">
+                  <img src="" alt="avatar" width="10" height="40">
+                  <div class="about">
+                      <div class="name"></div>
+                      <div class="status"></div>
+                      <div class="status"></div>
+                  </div>
+                </li>
           </div>
     `;
-    $('.inbox_chat').append(chat);
-    $(".chat_list").click(makeChatActive);
+    $('.people-list').append(chat);
+    $(".people-list").click(makeChatActive);
   }
   if (data.command == "new_message") {
+    $(`#${data.chat_id}`).find(".icon-badge").attr('data', data.count_unread);
+    $(`#${data.chat_id}`).find(".icon-badge").text("");
+    $(`#${data.chat_id}`).find(".icon-badge").text($(`#${data.chat_id}`).find(".icon-badge").attr('data'));
     $('#chat-log').append(data.username + ": " + data.message + '\n');
     let currentUser = JSON.parse(localStorage.getItem('userData'));
     let message_list = data
@@ -48,8 +55,16 @@ function messageInChat(e) {
     } else {
       message = ingoingMessage(image, message_list.content, message_list.date);
     }
-    $('.msg_history').append(message);
-    $('.msg_history').scrollTop($('.msg_history').prop('scrollHeight'));
+    $('.chat-history').append(message);
+    $('.chat-history').scrollTop($('.chat-history').prop('scrollHeight'));
+  }
+  if (data.type == "check_message") {
+    // TODO: проблема в том, что у каждого чата есть id, т.е нам надо коннектится к другому диву
+    let temp = Number($('.icon-badge').attr('data'));
+    console.log($('.icon-badge').attr('data'))
+    $('.icon-badge').attr('data', temp + 1);
+    $('.icon-badge').text("");
+    $('.icon-badge').text($('.icon-badge').attr('data'));
   }
 }
 
@@ -58,9 +73,15 @@ function sendMessage() {
   chat.send(JSON.stringify({
     'command': 'new_message',
     'message': message,
-    'chat_id': $('.msg_history').attr('id'),
+    'chat_id': $('.chat-history').attr('id'),
   }));
   $('.write_msg').val("");
 }
 
-
+function hasReadMessage(chatId, messageId) {
+  chat.send(JSON.stringify({
+    'command': 'check_message',
+    'chat_id': chatId,
+    'message_id': messageId,
+  }));
+}
