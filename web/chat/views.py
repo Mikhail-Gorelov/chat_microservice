@@ -24,101 +24,6 @@ import json
 
 logger = logging.getLogger(__name__)
 
-redis_instance = redis.StrictRedis(host='redis', port='6379', db=0)
-
-
-# проблемы с подключение, нужно понять как подключать/ подключить бд через настройки
-
-
-class ManageRedisItems(GenericAPIView):
-    serializer_class = serializers.RedisSerializer
-
-    def get(self, request):
-        items = {}
-        count = 0
-        for key in redis_instance.keys("*"):
-            items[key.decode("utf-8")] = redis_instance.get(key)
-            count += 1
-        response = {
-            'count': count,
-            'msg': f"Found {count} items.",
-            'items': items
-        }
-        return Response(response, status=200)
-
-    def post(self, request):
-        item = self.get_serializer(data=request.data)
-        item.is_valid(raise_exception=True)
-        item.save()
-        key = item.data['key']
-        value = item.data['value']
-        redis_instance.set(key, value)
-        response = {
-            'msg': f"{key} successfully set to {value}"
-        }
-        return Response(response, 201)
-
-
-class ManageRedisItem(GenericAPIView):
-    serializer_class = serializers.RedisSerializer
-
-    def get(self, request, **kwargs):
-        if kwargs['key']:
-            value = redis_instance.get(kwargs['key'])
-            if value:
-                response = {
-                    'key': kwargs['key'],
-                    'value': value,
-                    'msg': 'success'
-                }
-                return Response(response, status=200)
-            else:
-                response = {
-                    'key': kwargs['key'],
-                    'value': None,
-                    'msg': 'Not found'
-                }
-                return Response(response, status=404)
-
-    def put(self, request, **kwargs):
-        if kwargs['key']:
-            item = serializers.RedisUpdateSerializer(data=request.data)
-            item.is_valid(raise_exception=True)
-            item.save()
-            new_value = item.data['value']
-            value = redis_instance.get(kwargs['key'])
-            if value:
-                redis_instance.set(kwargs['key'], new_value)
-                response = {
-                    'key': kwargs['key'],
-                    'value': value,
-                    'msg': f"Successfully updated {kwargs['key']}"
-                }
-                return Response(response, status=200)
-            else:
-                response = {
-                    'key': kwargs['key'],
-                    'value': None,
-                    'msg': 'Not found'
-                }
-                return Response(response, status=404)
-
-    def delete(self, request, **kwargs):
-        if kwargs['key']:
-            result = redis_instance.delete(kwargs['key'])
-            if result == 1:
-                response = {
-                    'msg': f"{kwargs['key']} successfully deleted"
-                }
-                return Response(response, status=404)
-            else:
-                response = {
-                    'key': kwargs['key'],
-                    'value': None,
-                    'msg': 'Not found'
-                }
-                return Response(response, status=404)
-
 
 class LastMessagesView(ListAPIView):
     serializer_class = serializers.MessageSerializer
@@ -163,6 +68,7 @@ class UserChatView(ListAPIView):
     def get_serializer_context(self):
         context = super(UserChatView, self).get_serializer_context()
         context['user_data'] = ChatService.get_chat_contacts_data(self.user.id, self.request)
+        context['user'] = self.user
         return context
 
 

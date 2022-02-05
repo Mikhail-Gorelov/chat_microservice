@@ -1,5 +1,5 @@
 import os
-
+import redis
 from django.utils.translation import gettext_lazy as _
 
 from .additional_settings.cacheops_settings import *
@@ -9,6 +9,10 @@ from .additional_settings.logging_settings import *
 from .additional_settings.swagger_settings import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+REDIS_DATABASE = redis.StrictRedis(
+    host=os.environ.get('REDIS_HOST'), port=os.environ.get('REDIS_PORT'), db=os.environ.get('REDIS_DB')
+)
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 

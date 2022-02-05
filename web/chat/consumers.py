@@ -1,9 +1,9 @@
 from urllib.parse import parse_qs
-
+from django.conf import settings
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.cache import cache
-
+from django.utils import timezone
 from main.models import ChatDataId, UserData
 from main.services import MainService
 
@@ -34,9 +34,17 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         self.user = self.scope['user']
+        self.redis = settings.REDIS_DATABASE
         # self.user = None
         await self.init_user_chat()
         await self.accept()
+        await self.set_user_online()
+
+    async def set_user_online(self):
+        self.redis.set(self.user['id'], "online")
+
+    async def set_user_offline(self):
+        self.redis.set(str(self.user['id']), "offline")
 
     async def init_user_chat(self):
         chat_list: list[ChatDataId] = [
@@ -56,7 +64,7 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json(content=data)
 
     async def disconnect(self, close_code):
-        pass
+        await self.set_user_offline()
         # await self.channel_layer.group_discard(
         #     self.room_group_name,
         #     self.channel_name
@@ -72,28 +80,39 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         message = await self.create_message(data.get("message"), data.get("chat_id"))
         data_template = await self.response_template(
             chat_id=data.get("chat_id"),
+            type="chat.message",
+            command="new_message",
             message_id=message.pk,
             author_id=message.author_id,
             content=message.content,
             date=str(message.date),
             has_read=message.has_read
         )
-        data["has_read"] = message.has_read
-        message_count: dict = await database_sync_to_async(message.chat.count_unread_messages)()
-        data["count_unread"] = message_count["count"]
+        # data["has_read"] = message.has_read
+        message_count: dict = await database_sync_to_async(message.chat.count_unread_messages)(message.author_id)
+        data_template["count_unread"] = message_count["count"]
+        # data["count_unread"] = message_count["count"]
+        # await self.channel_layer.group_send(
+        #     data.get("chat_id"),
+        #     {
+        #         "type": "chat.message",
+        #         "data": data,
+        #     },
+        # )
         await self.channel_layer.group_send(
-            data.get("chat_id"),
+            data_template.get("chat_id"),
             {
-                "type": "chat.message",
-                "data": data,
-            },
+                "type": data_template.get("type"),
+                "data": data_template,
+            }
         )
 
     async def response_template(self, **kwargs) -> dict:
         return {
-            "type": "chat.message",
             "chat_id": kwargs["chat_id"],
+            "type": kwargs["type"],
             "data": {
+                "command": kwargs.get("command"),
                 "message_id": kwargs.get("message_id"),
                 "author_id": kwargs.get("author_id"),
                 "content": kwargs.get("content"),
@@ -110,12 +129,33 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         return message
 
     async def check_message(self, data):
+        print(data)
+        message = await self.create_message(data.get("message_id"), data.get("chat_id"))
+        data_template = await self.response_template(
+            chat_id=data.get("chat_id"),
+            type="chat.message",
+            command="check_message",
+            message_id=message.pk,
+            author_id=message.author_id,
+            content=message.content,
+            date=str(message.date),
+            has_read=message.has_read
+        )
+        message_count: dict = await database_sync_to_async(message.chat.count_unread_messages)(message.author_id)
+        data_template["count_unread"] = message_count["count"]
+        # await self.channel_layer.group_send(
+        #     data.get('chat_id'),
+        #     {
+        #         "type": "chat.message",
+        #         "data": data,
+        #     },
+        # )
         await self.channel_layer.group_send(
-            data.get('chat_id'),
+            data_template.get("chat_id"),
             {
-                "type": "chat.message",
-                "data": data,
-            },
+                "type": data_template.get("type"),
+                "data": data_template,
+            }
         )
         await self.check_message_db(data.get("message_id"))
 

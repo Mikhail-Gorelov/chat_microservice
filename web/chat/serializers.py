@@ -6,7 +6,7 @@ from channels.layers import get_channel_layer
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.status import HTTP_400_BAD_REQUEST
-
+from django.conf import settings
 from main.models import UserData
 from main.services import MainService
 from main.utils import find_dict_in_list
@@ -83,9 +83,6 @@ class ChatSerializer(serializers.Serializer):
 class UserChatShortSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         to_repr = super().to_representation(instance)
-        output_list = list()
-        if find_dict_in_list(self.context['user_data'], 'id', to_repr['user_id']) != {}:
-            output_list.append(find_dict_in_list(self.context['user_data'], 'id', to_repr['user_id']))
         return find_dict_in_list(self.context['user_data'], 'id', to_repr['user_id'])
 
     class Meta:
@@ -98,6 +95,8 @@ class ChatListSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
     last_message = serializers.SerializerMethodField('get_last_message')
     last_message_date = serializers.SerializerMethodField('get_last_message_date')
+    count_unread = serializers.SerializerMethodField('get_unread')
+    interlocutor_online = serializers.SerializerMethodField('get_interlocutor_online')
 
     def get_users(self, obj):
         return UserChatShortSerializer(obj.user_chats, many=True, context=self.context).data
@@ -111,6 +110,13 @@ class ChatListSerializer(serializers.ModelSerializer):
             return obj.last_message_date.strftime("%d-%m-%Y %H:%M:%S")
         return obj.last_message_date
 
+    def get_interlocutor_online(self, obj):
+        user_id = obj.user_chats.exclude(user_id=self.context['user'].id).values_list('user_id', flat=True)[0]
+        return settings.REDIS_DATABASE.get(user_id)
+
+    def get_unread(self, obj: models.Chat) -> int:
+        return obj.count_unread_messages(self.context['user'].id)['count']
+
     class Meta:
         model = models.Chat
         fields = (
@@ -123,6 +129,8 @@ class ChatListSerializer(serializers.ModelSerializer):
             "last_message",
             "last_message_date",
             "user_chats",
+            "count_unread",
+            "interlocutor_online",
         )
 
 
@@ -189,18 +197,3 @@ class ChatShortInfoSerializer(serializers.Serializer):
     def create(self, validated_data):
         print(validated_data)
         return ChatService.get_users_information(data=validated_data, request=self.context['request'])
-
-
-class RedisSerializer(serializers.Serializer):
-    key = serializers.CharField()
-    value = serializers.CharField()
-
-    def create(self, validated_data):
-        return validated_data
-
-
-class RedisUpdateSerializer(serializers.Serializer):
-    value = serializers.CharField()
-
-    def create(self, validated_data):
-        return validated_data

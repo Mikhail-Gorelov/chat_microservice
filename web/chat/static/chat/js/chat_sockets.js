@@ -1,5 +1,4 @@
 $(function () {
-  // TODO: типо стандартная инициализация, нужно иначе вероятно её делать
   $(".msg_send_btn").click(sendMessage);
 });
 
@@ -19,11 +18,12 @@ function closeChat(e) {
 
 function messageInChat(e) {
   const data = JSON.parse(e.data);
+  console.log(data);
   let image = $('.active_chat').attr('href');
-  if (data.type == "user.connect") {
+  if (data.type === "user.connect") {
     $("#usernameList").append(data.data.username + " ");
   }
-  if (data.command == "add_chat") {
+  if (data.command === "add_chat") {
     console.log("added chat");
     console.log(data);
     console.log(data.chat_id)
@@ -42,7 +42,7 @@ function messageInChat(e) {
     $('.people-list').append(chat);
     $(".people-list").click(makeChatActive);
   }
-  if (data.command == "new_message") {
+  if (data.data.command === "new_message") {
     $(`#${data.chat_id}`).find(".icon-badge").attr('data', data.count_unread);
     $(`#${data.chat_id}`).find(".icon-badge").text("");
     $(`#${data.chat_id}`).find(".icon-badge").text($(`#${data.chat_id}`).find(".icon-badge").attr('data'));
@@ -58,13 +58,17 @@ function messageInChat(e) {
     $('.chat-history').append(message);
     $('.chat-history').scrollTop($('.chat-history').prop('scrollHeight'));
   }
-  if (data.type == "check_message") {
-    // TODO: проблема в том, что у каждого чата есть id, т.е нам надо коннектится к другому диву
-    let temp = Number($('.icon-badge').attr('data'));
-    console.log($('.icon-badge').attr('data'))
-    $('.icon-badge').attr('data', temp + 1);
-    $('.icon-badge').text("");
-    $('.icon-badge').text($('.icon-badge').attr('data'));
+  if (data.data.command === "check_message") {
+    let temp = Number($(`#${data.chat_id}`).find(".icon-badge").attr('data'));
+    if (temp === 0) {
+      $(`#${data.chat_id}`).find(".icon-badge").attr('data', 0);
+      $(`#${data.chat_id}`).find(".icon-badge").text("");
+      $(`#${data.chat_id}`).find(".icon-badge").text($(`#${data.chat_id}`).find(".icon-badge").attr('data'));
+    } else {
+      $(`#${data.chat_id}`).find(".icon-badge").attr('data', temp - 1);
+      $(`#${data.chat_id}`).find(".icon-badge").text("");
+      $(`#${data.chat_id}`).find(".icon-badge").text($(`#${data.chat_id}`).find(".icon-badge").attr('data'));
+    }
   }
 }
 

@@ -53,6 +53,28 @@ function ingoingMessage(image, content, date) {
   return message;
 }
 
+function chatListFunc(id, imageHref, imageSrc, title, lastMessageDate, lastMessage, countUnread) {
+  let chat = `
+              <div class="chat_list" id="${id}" href="${imageHref}">
+                <li class="clearfix">
+                  <img src="${imageSrc}" alt="avatar" width="10" height="40">
+                  <div class="about">
+                      <div class="name">${title}</div>
+                      <div class="status"> ${lastMessageDate} </div>
+                      <div class="status"> ${lastMessage}
+                      <div class="status">
+                      <div class="icon-badge-container">
+                        <i class="far fa-envelope icon-badge-icon"></i>
+                        <div class="icon-badge" data="${countUnread}">${countUnread}</div>
+                      </div>
+                       <i class="fa fa-circle online"></i> online </div>
+                  </div>
+                </li>
+              </div>
+    `;
+  return chat;
+}
+
 function getChatList() {
   $.ajax({
     url: $(".people-list").attr("data-href"),
@@ -87,25 +109,9 @@ function chatListRender(data) {
     if (chatList[i].last_message_date == null) {
       chatList[i].last_message_date = chatList[i].date;
     }
-    let chat = `
-              <div class="chat_list" id="${chatList[i].id}" href="${chatList[i].user_chats[1].image}">
-                <li class="clearfix">
-                  <img src="${chatList[i].file}" alt="avatar" width="10" height="40">
-                  <div class="about">
-                      <div class="name">${chatList[i].name}</div>
-                      <div class="status"> ${chatList[i].last_message_date} </div>
-                      <div class="status"> ${chatList[i].last_message}
-                      <div class="status">
-                      <div class="icon-badge-container">
-                        <i class="far fa-envelope icon-badge-icon"></i>
-                        <div class="icon-badge"></div>
-                      </div>
-                       <i class="fa fa-circle online"></i> online </div>
-                  </div>
-                </li>
-              </div>
-    `;
-    chats += chat
+    chats += chatListFunc(
+      chatList[i].id, chatList[i].user_chats[1].image, chatList[i].file, chatList[i].name, chatList[i].last_message_date,
+      chatList[i].last_message, chatList[i].count_unread);
   })
   ulStart += chats
   ulStart += ulEnd

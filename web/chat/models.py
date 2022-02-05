@@ -13,8 +13,16 @@ class Chat(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     file = models.ImageField(upload_to="file_storage/")
 
-    def count_unread_messages(self):
-        return self.messages.aggregate(count=models.Count("has_read", filter=models.Q(has_read=False)))
+    # def count_unread_messages(self):
+    #     return self.messages.filter(
+    #         ~models.Q(author_id__in=self.messages.values_list('author_id', flat=True))).aggregate(
+    #         count=models.Count(
+    #             "has_read", filter=models.Q(has_read=False)))
+
+    def count_unread_messages(self, current_user_id: int):
+        return self.messages.exclude(author_id=current_user_id).aggregate(
+            count=models.Count(
+                "has_read", filter=models.Q(has_read=False)))
 
 
 class Message(models.Model):
@@ -43,3 +51,9 @@ class UserChat(models.Model):
                 name='Unique user in chat',
             )
         ]
+
+    # def count_unread(self):
+    #     return self.chat.messages.filter(~models.Q(author_id=self.user_id)).aggregate(
+    #         count=models.Count(
+    #             "has_read", filter=models.Q(has_read=False))
+    #     )
