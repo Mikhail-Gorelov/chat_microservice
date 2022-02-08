@@ -20,6 +20,7 @@ urlpatterns = [
     path('message-list/<chat_id>/', views.MessageChatView.as_view(), name="message-list"),
     path('init/', views.ChatInitView.as_view(), name="index"),
     path('short-info/', views.ChatShortInfoView.as_view(), name='short-info'),
+    path('upload-file/<pk>/', views.UpdateFileView.as_view(), name='upload_file'),
 ]
 
 urlpatterns += router.urls

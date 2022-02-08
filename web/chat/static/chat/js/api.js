@@ -1,3 +1,6 @@
+$(function () {
+  getChatList();
+});
 $.fn.scrollBottom = function() {
   return $(document).height() - this.scrollTop() - this.height();
 };
@@ -21,11 +24,8 @@ $('.chat-history').scroll(function () {
   if (($(this).scrollTop() + $(this).scrollBottom()) <= 257) {
     //  chat_id, message_id -> consumer
     console.log('checked');
-    hasReadMessage(chatId = $(this).attr('id'), messageId = 45);
+    hasReadMessage(chatId = $(this).attr('id'), messageId = 1);
   }
-});
-$(function () {
-  getChatList();
 });
 
 function outgoingMessage(content, date) {
@@ -53,26 +53,136 @@ function ingoingMessage(image, content, date) {
   return message;
 }
 
-function chatListFunc(id, imageHref, imageSrc, title, lastMessageDate, lastMessage, countUnread) {
-  let chat = `
-              <div class="chat_list" id="${id}" href="${imageHref}">
-                <li class="clearfix">
-                  <img src="${imageSrc}" alt="avatar" width="10" height="40">
-                  <div class="about">
-                      <div class="name">${title}</div>
-                      <div class="status"> ${lastMessageDate} </div>
-                      <div class="status"> ${lastMessage}
-                      <div class="status">
-                      <div class="icon-badge-container">
-                        <i class="far fa-envelope icon-badge-icon"></i>
-                        <div class="icon-badge" data="${countUnread}">${countUnread}</div>
-                      </div>
-                       <i class="fa fa-circle online"></i> online </div>
-                  </div>
-                </li>
+function chatListFunc(id, imageHref, imageSrc, title, lastMessageDate, lastMessage, countUnread, interlocutorsName,
+                      profile, interlocutorOnline) {
+  if (interlocutorOnline.status === "online") {
+    let chat = `
+                <div class="chat_list" id="${id}" href="${imageHref}" data="${interlocutorsName}" data-href="${profile}" data-status="${interlocutorOnline.status}" data-last-seen="${interlocutorOnline.last_seen}">
+                  <li class="clearfix">
+                    <img src="${imageSrc}" alt="avatar" width="10" height="40">
+                    <div class="about">
+                        <div class="name">${title}</div>
+                        <div class="status"> ${lastMessageDate} </div>
+                        <div class="status"> ${lastMessage}
+                        <div class="status">
+                        <div class="icon-badge-container">
+                          <i class="far fa-envelope icon-badge-icon"></i>
+                          <div class="icon-badge" data="${countUnread}">${countUnread}</div>
+                        </div>
+                         <i class="fa fa-circle online"></i> online </div>
+                    </div>
+                  </li>
+                </div>
+      `;
+    return chat;
+  } else {
+    let chat = `
+                <div class="chat_list" id="${id}" href="${imageHref}" data="${interlocutorsName}" data-href="${profile}" data-status="${interlocutorOnline.status}" data-last-seen="${interlocutorOnline.last_seen}">
+                  <li class="clearfix">
+                    <img src="${imageSrc}" alt="avatar" width="10" height="40">
+                    <div class="about">
+                        <div class="name">${title}</div>
+                        <div class="status"> ${lastMessageDate} </div>
+                        <div class="status"> ${lastMessage}
+                        <div class="status">
+                        <div class="icon-badge-container">
+                          <i class="far fa-envelope icon-badge-icon"></i>
+                          <div class="icon-badge" data="${countUnread}">${countUnread}</div>
+                        </div>
+                         <i class="fa fa-circle offline"></i> offline </div>
+                    </div>
+                  </li>
+                </div>
+      `;
+    return chat;
+  }
+}
+
+function uploadImage() {
+  let fd = new FormData();
+  let button = $(this);
+  let files = button[0].files;
+
+  // Check file selected or not
+  if(files.length > 0 ){
+      fd.append('image',files[0]);
+  }
+
+  $.ajax({
+    url: button.data("href"),
+    type: "POST",
+    contentType: false,
+    processData: false,
+    data: fd,
+    success: function (data) {
+     console.log(data);
+     $('#userAvatar').attr("src", data.image);
+    },
+    error: function (data) {
+     console.log("error");
+    },
+  })
+}
+
+function chatAbout(image, name, profile, status, lastSeen) {
+  let buttons = `
+  <div class="col-lg-6 hidden-sm text-right">
+    <a href="javascript:void(0);" class="btn btn-outline-secondary"><i class="fa fa-camera"></i></a>
+    <i class="fa fa-image"><input id="uploadFile" class="btn btn-outline-primary" type="file"></i>
+    <a href="javascript:void(0);" class="btn btn-outline-info"><i class="fa fa-cogs"></i></a>
+    <a href="javascript:void(0);" class="btn btn-outline-warning"><i class="fa fa-question"></i></a>
+  </div>
+  `;
+  let wrapperTop= `
+   <div class="row">
+  `;
+  let wrapperBottom = `
+  </div>
+  `;
+  if (status === "undefined" && lastSeen === "undefined") {
+    let header = `
+          <div class="col-lg-6">
+              <a href="${profile}" target="_blank">
+                  <img src="${image}" alt="avatar">
+              </a>
+              <div class="chat-about">
+                  <h6 class="m-b-0">${name}</h6>
+                  <i class="fa fa-circle offline"></i>
+                  <small>Last seen: never</small>
               </div>
-    `;
-  return chat;
+          </div>
+  `;
+    return wrapperTop + header + buttons + wrapperBottom
+  }
+  if (status === "online") {
+    let header = `
+          <div class="col-lg-6">
+              <a href="${profile}" target="_blank">
+                  <img src="${image}" alt="avatar">
+              </a>
+              <div class="chat-about">
+                  <h6 class="m-b-0">${name}</h6>
+                  <i class="fa fa-circle online"></i>
+              </div>
+          </div>
+  `;
+    return wrapperTop + header + buttons + wrapperBottom
+  }
+  if (status ===  "offline") {
+    let header = `
+          <div class="col-lg-6">
+              <a href="${profile}" target="_blank">
+                  <img src="${image}" alt="avatar">
+              </a>
+              <div class="chat-about">
+                  <h6 class="m-b-0">${name}</h6>
+                  <i class="fa fa-circle offline"></i>
+                  <small>Last seen: ${lastSeen}</small>
+              </div>
+          </div>
+  `;
+    return wrapperTop + header + buttons + wrapperBottom
+  }
 }
 
 function getChatList() {
@@ -92,6 +202,8 @@ function makeChatActive(e) {
   $('.chat-history').attr('id', block.attr('id'));
   $('.chat-history').empty();
   $('.chat-history').attr('href', block.attr('href'));
+  getChatAbout(
+    block.attr('href'), block.attr('data'), block.attr('data-href'), block.attr('data-status'), block.attr('data-last-seen'));
   getMessagesInChat(block.attr('id'), block.attr('href'));
   $('.chat-history').scrollTop($('.chat-history').prop('scrollHeight'));
 }
@@ -111,7 +223,8 @@ function chatListRender(data) {
     }
     chats += chatListFunc(
       chatList[i].id, chatList[i].user_chats[1].image, chatList[i].file, chatList[i].name, chatList[i].last_message_date,
-      chatList[i].last_message, chatList[i].count_unread);
+      chatList[i].last_message, chatList[i].count_unread, chatList[i].user_chats[1].full_name,
+      chatList[i].user_chats[1].profile, chatList[i].interlocutor_online);
   })
   ulStart += chats
   ulStart += ulEnd
@@ -122,6 +235,12 @@ function chatListRender(data) {
 
 function convertTZ(date, tzString) {
   return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: tzString}));
+}
+
+function getChatAbout(image, name, profile, status, lastSeen) {
+  $('#header').empty();
+  $('#header').prepend(chatAbout(image, name, profile, status, lastSeen));
+  $('#uploadFile').change(uploadImage);
 }
 
 function getMessagesInChat(id, image, url = null) {

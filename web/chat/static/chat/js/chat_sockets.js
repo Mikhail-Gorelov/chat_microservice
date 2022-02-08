@@ -18,7 +18,6 @@ function closeChat(e) {
 
 function messageInChat(e) {
   const data = JSON.parse(e.data);
-  console.log(data);
   let image = $('.active_chat').attr('href');
   if (data.type === "user.connect") {
     $("#usernameList").append(data.data.username + " ");

@@ -112,7 +112,9 @@ class ChatListSerializer(serializers.ModelSerializer):
 
     def get_interlocutor_online(self, obj):
         user_id = obj.user_chats.exclude(user_id=self.context['user'].id).values_list('user_id', flat=True)[0]
-        return settings.REDIS_DATABASE.get(user_id)
+        data = settings.REDIS_DATABASE.hgetall(str(user_id))
+        new_data = {key.decode(): val.decode() for key, val in data.items()}
+        return new_data
 
     def get_unread(self, obj: models.Chat) -> int:
         return obj.count_unread_messages(self.context['user'].id)['count']
@@ -197,3 +199,21 @@ class ChatShortInfoSerializer(serializers.Serializer):
     def create(self, validated_data):
         print(validated_data)
         return ChatService.get_users_information(data=validated_data, request=self.context['request'])
+
+
+class FileUploadSerializer(serializers.ModelSerializer):
+    file = serializers.FileField()
+
+    class Meta:
+        model = models.Chat
+        fields = ['file']
+
+    # def validate(self, attrs):
+    #     limit = 4 * 1024 * 1024  # 4 mb
+    #     if attrs.get('image').size > limit:
+    #         raise serializers.ValidationError('File too large. Size should not exceed 4 MiB.')
+    #     return attrs
+
+    def save(self):
+        message = self.instance.messages.create(content='')
+        print(self.validated_data['file'])

@@ -9,7 +9,7 @@ from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-
+from .choices import ChatStatus
 from chat.models import Message
 from main.models import UserData
 from main.pagination import BaseCursorPagination, BasePageNumberPagination
@@ -80,7 +80,7 @@ class MessageChatView(ListAPIView):
     # вот здесь должна быть правка о том, что именно определённые письма выводятся
     # пока хардкодим, смотрим на что-то подобное из блога
     def get_queryset(self):
-        return ChatService.get_messages_in_chat(chat=self.kwargs.get("chat_id"))
+        return ChatService.get_messages_in_chat(chat=self.kwargs.get("chat_id")).order_by("-id")
 
     def get_template_name(self):
         return 'chat/includes/messages.html'
@@ -130,3 +130,16 @@ class ChatShortInfoView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.save()
         return Response(data)
+
+
+class UpdateFileView(GenericAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.FileUploadSerializer
+    queryset = models.Chat.objects.filter(status=ChatStatus.OPEN)
+    parser_classes = (MultiPartParser,)
+
+    def post(self, request, pk):
+        serializer = self.get_serializer(data=request.data, instance=self.get_object())
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

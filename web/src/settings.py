@@ -9,8 +9,8 @@ from .additional_settings.logging_settings import *
 from .additional_settings.swagger_settings import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-REDIS_DATABASE = redis.StrictRedis(
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
+REDIS_DATABASE = redis.Redis(
     host=os.environ.get('REDIS_HOST'), port=os.environ.get('REDIS_PORT'), db=os.environ.get('REDIS_DB')
 )
 
