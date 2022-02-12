@@ -16,11 +16,31 @@ function closeChat(e) {
   console.error('Chat socket closed unexpectedly');
 }
 
+function messageFile(data) {
+  console.log(data);
+  let file_message = `
+        <div class="outgoing_msg">
+        <div class="sent_msg">
+            <p>
+            <audio controls>
+            <source src="${data.data.file}"" type="audio/mpeg">
+            <source src="${data.data.file}"" type="audio/ogg">
+            </p>
+            <span class="time_date"></span> </div>
+        </div>
+        `;
+  $('.chat-history').append(file_message);
+  $('.chat-history').scrollTop($('.chat-history').prop('scrollHeight'));
+}
+
 function messageInChat(e) {
   const data = JSON.parse(e.data);
   let image = $('.active_chat').attr('href');
   if (data.type === "user.connect") {
     $("#usernameList").append(data.data.username + " ");
+  }
+  if (data.type === "file.message") {
+    messageFile(data);
   }
   if (data.command === "add_chat") {
     console.log("added chat");
@@ -28,17 +48,28 @@ function messageInChat(e) {
     console.log(data.chat_id)
     let chat = `
     <div class="chat_list" id="${data.chat_id}">
-            <li class="clearfix">
-                  <img src="" alt="avatar" width="10" height="40">
-                  <div class="about">
-                      <div class="name"></div>
-                      <div class="status"></div>
-                      <div class="status"></div>
-                  </div>
-                </li>
-          </div>
+                  <li class="clearfix">
+                    <img src="" alt="avtr" width="10" height="40">
+                    <div class="about">
+                        <div class="name">Title</div>
+                        <div class="status"> Last Message Date </div>
+                        <div class="status"> Last Message
+                        <div class="status">
+                        <div class="icon-badge-container">
+                          <i class="far fa-envelope icon-badge-icon"></i>
+                          <div class="icon-badge" data="0">0</div>
+                        </div>
+                         <i class="fa fa-circle online"></i> online </div>
+                    </div>
+                  </li>
+                </div>
     `;
-    $('.people-list').append(chat);
+    let ulStart = `<ul class="list-unstyled chat-list mt-2 mb-0">`;
+    let ulEnd = `</ul>`;
+    ulStart += chat
+    ulStart += ulEnd
+    // TODO: добавляю в существующий ul
+    $('.people-list').append(ulStart);
     $(".people-list").click(makeChatActive);
   }
   if (data.data.command === "new_message") {

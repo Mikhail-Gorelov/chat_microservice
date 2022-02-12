@@ -1,4 +1,5 @@
 import datetime
+import os
 from datetime import timedelta
 
 from asgiref.sync import async_to_sync
@@ -214,6 +215,23 @@ class FileUploadSerializer(serializers.ModelSerializer):
     #         raise serializers.ValidationError('File too large. Size should not exceed 4 MiB.')
     #     return attrs
 
-    def save(self):
-        message = self.instance.messages.create(content='')
-        print(self.validated_data['file'])
+    def to_representation(self, instance):
+        return {'message': str(self.message.content), 'file_message': self.file_message.filename}
+
+    def save(self, **kwargs):
+        self.message = self.instance.messages.create(content='', author_id=1)  # TODO: NO HARDCODE
+        self.file_message = models.FileMessage.objects.create(message=self.message, file=self.validated_data['file'],
+                                                              filename="check", content_type="jpg")
+        request = self.context['request']
+        async_to_sync(get_channel_layer().group_send)(
+            str(self.instance.pk), {
+                "type": "file.message",
+                "data": {
+                    "file": request.build_absolute_uri(self.file_message.file.url),
+                    "message_id": str(self.file_message.message.pk),
+                    "filename": self.file_message.filename,
+                    "content_type": self.file_message.content_type,
+                }
+            }
+        )
+        return

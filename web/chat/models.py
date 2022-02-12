@@ -48,7 +48,7 @@ class UserChat(models.Model):
 
 
 def file_upload_to(obj: "FileMessage", filename: str) -> str:
-    return ""
+    return f"message_files/{obj.message.chat_id}/{filename}"
 
 
 class FileMessage(models.Model):

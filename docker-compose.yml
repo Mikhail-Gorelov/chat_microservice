@@ -37,17 +37,23 @@ services:
       interval: 1m30s
       timeout: 3s
       retries: 3
+    command: bash -c "while !</dev/tcp/world_skills_local_postgres_service/5432; do sleep 1; done;
+      python manage.py migrate;
+      python manage.py set_default_permissions;
+      python manage.py create_base_pages;
+      python manage.py collectstatic --noinput --clear > /dev/null;
+      python manage.py runserver 0.0.0.0:8000"
   db:
     build:
       context: .
       dockerfile: docker/dev/db/Dockerfile
     hostname: postgres
-    restart: unless-stopped
+    restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data/
       - postgres_socket:/postgres_socket
-#    ports:
-#      - 5431:5432
+    ports:
+      - "5431:5432"
     env_file:
       - docker/dev/env/.db.env
     networks:

@@ -24,7 +24,7 @@ $('.chat-history').scroll(function () {
   if (($(this).scrollTop() + $(this).scrollBottom()) <= 257) {
     //  chat_id, message_id -> consumer
     console.log('checked');
-    hasReadMessage(chatId = $(this).attr('id'), messageId = 1);
+    hasReadMessage(chatId = $(this).attr('id'), messageId = 3);
   }
 });
 
@@ -59,7 +59,7 @@ function chatListFunc(id, imageHref, imageSrc, title, lastMessageDate, lastMessa
     let chat = `
                 <div class="chat_list" id="${id}" href="${imageHref}" data="${interlocutorsName}" data-href="${profile}" data-status="${interlocutorOnline.status}" data-last-seen="${interlocutorOnline.last_seen}">
                   <li class="clearfix">
-                    <img src="${imageSrc}" alt="avatar" width="10" height="40">
+                    <img src="${imageSrc}" alt="avtr" width="10" height="40">
                     <div class="about">
                         <div class="name">${title}</div>
                         <div class="status"> ${lastMessageDate} </div>
@@ -79,7 +79,7 @@ function chatListFunc(id, imageHref, imageSrc, title, lastMessageDate, lastMessa
     let chat = `
                 <div class="chat_list" id="${id}" href="${imageHref}" data="${interlocutorsName}" data-href="${profile}" data-status="${interlocutorOnline.status}" data-last-seen="${interlocutorOnline.last_seen}">
                   <li class="clearfix">
-                    <img src="${imageSrc}" alt="avatar" width="10" height="40">
+                    <img src="${imageSrc}" alt="avtr" width="10" height="40">
                     <div class="about">
                         <div class="name">${title}</div>
                         <div class="status"> ${lastMessageDate} </div>
@@ -143,7 +143,7 @@ function chatAbout(image, name, profile, status, lastSeen) {
     let header = `
           <div class="col-lg-6">
               <a href="${profile}" target="_blank">
-                  <img src="${image}" alt="avatar">
+                  <img src="${image}" alt="avtr">
               </a>
               <div class="chat-about">
                   <h6 class="m-b-0">${name}</h6>
@@ -158,11 +158,11 @@ function chatAbout(image, name, profile, status, lastSeen) {
     let header = `
           <div class="col-lg-6">
               <a href="${profile}" target="_blank">
-                  <img src="${image}" alt="avatar">
+                  <img src="${image}" alt="avtr">
               </a>
               <div class="chat-about">
                   <h6 class="m-b-0">${name}</h6>
-                  <i class="fa fa-circle online"></i>
+                  <i class="fa fa-circle online"></i> Online
               </div>
           </div>
   `;
@@ -172,7 +172,7 @@ function chatAbout(image, name, profile, status, lastSeen) {
     let header = `
           <div class="col-lg-6">
               <a href="${profile}" target="_blank">
-                  <img src="${image}" alt="avatar">
+                  <img src="${image}" alt="avtr">
               </a>
               <div class="chat-about">
                   <h6 class="m-b-0">${name}</h6>

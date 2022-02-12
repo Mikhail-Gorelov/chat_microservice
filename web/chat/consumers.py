@@ -142,6 +142,9 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         data.update(dict(data_new[0]))
         await self.send_json(content=data)
 
+    async def file_message(self, event: dict):
+        await self.send_json(content=event)
+
     async def user_connect(self, event: dict):
         await self.send_json(content=event)
 

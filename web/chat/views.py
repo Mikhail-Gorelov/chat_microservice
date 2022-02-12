@@ -1,7 +1,11 @@
 import logging
+import os
+
 import redis
+import uuid
 from django.conf import settings
 from django.core.cache import cache
+from django.http import FileResponse
 from django.shortcuts import render
 from pyparsing import unicode
 from rest_framework import status, viewsets
@@ -138,8 +142,29 @@ class UpdateFileView(GenericAPIView):
     queryset = models.Chat.objects.filter(status=ChatStatus.OPEN)
     parser_classes = (MultiPartParser,)
 
-    def post(self, request, pk):
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = queryset.get(pk=self.kwargs['chat_id'])
+        return obj
+
+    def post(self, request, chat_id):
         serializer = self.get_serializer(data=request.data, instance=self.get_object())
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class DownloadFileView(GenericAPIView):
+    queryset = models.FileMessage.objects.all()
+    permission_classes = (AllowAny,)
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = queryset.get(message=self.message_filter)
+        return obj
+
+    def get(self, request, message_id):
+        self.message_filter = message_id
+        obj = self.get_object()
+        file_path = os.path.join(settings.MEDIA_ROOT, models.file_upload_to(obj, ""))
+        return FileResponse(open(file_path, 'rb'))
