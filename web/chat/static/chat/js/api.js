@@ -1,7 +1,7 @@
 $(function () {
   getChatList();
 });
-$.fn.scrollBottom = function() {
+$.fn.scrollBottom = function () {
   return $(document).height() - this.scrollTop() - this.height();
 };
 let requestedNewPageChat = false;
@@ -16,7 +16,7 @@ $('.people-list').scroll(function () {
 });
 $('.chat-history').scroll(function () {
   if ($(this).scrollTop() === 0 && !requestedNewPage) {
-    if($(this).attr('data')) {
+    if ($(this).attr('data')) {
       requestedNewPageMessage = true;
       getMessagesInChat($(this).attr('id'), $(this).attr('href'), $(this).attr('data'));
     }
@@ -24,33 +24,118 @@ $('.chat-history').scroll(function () {
   if (($(this).scrollTop() + $(this).scrollBottom()) <= 257) {
     //  chat_id, message_id -> consumer
     console.log('checked');
-    hasReadMessage(chatId = $(this).attr('id'), messageId = 3);
+    hasReadMessage(chatId = $(this).attr('id'), messageId = 89);
   }
 });
 
-function outgoingMessage(content, date) {
-  let message = `
+function outgoingMessage(content, date, message_file) {
+  if (message_file === null) {
+    let message = `
         <div class="outgoing_msg">
         <div class="sent_msg">
             <p>${content}</p>
             <span class="time_date"> ${date}</span> </div>
         </div>
         `;
-  return message;
+    return message;
+  } else {
+    console.log(message_file);
+    if (message_file.content_type === "audio/mpeg") {
+      let file_message = `
+            <div class="outgoing_msg">
+            <div class="sent_msg">
+                <p>
+                <audio controls style="width: 250px;">
+                <source src="${message_file.file}" type="${message_file.content_type}">
+                </p>
+                <span class="time_date"></span> </div>
+            </div>
+            `;
+      return file_message;
+    } else if (message_file.content_type === "application/pdf") {
+      let file_message = `
+              <div class="outgoing_msg">
+              <div class="sent_msg">
+                  <p>
+                  <object data="${message_file.file}" width="250" height="200" type="${message_file.content_type}">
+                  </p>
+                  <span class="time_date"></span> </div>
+              </div>
+              `;
+      return file_message;
+    } else {
+      let file_message = `
+              <div class="outgoing_msg">
+              <div class="sent_msg">
+                  <p>
+                  <img src="${message_file.file}" width="250" height="200" alt="image">
+                  </p>
+                  <span class="time_date"></span> </div>
+              </div>
+              `;
+      return file_message;
+    }
+  }
 }
 
-function ingoingMessage(image, content, date) {
-  let message = `
-        <div class="incoming_msg">
-        <div class="incoming_msg_img"><img src="${image}" alt="sunil" id="imageId" width="40px" height="40px"></div>
-        <div class="received_msg">
-          <div class="received_withd_msg">
-            <p>${content}</p>
-            <span class="time_date"> ${date}</span></div>
-        </div>
-        </div>
-        `;
-  return message;
+function ingoingMessage(image, content, date, message_file) {
+  if (message_file === null) {
+    let message = `
+          <div class="incoming_msg">
+          <div class="incoming_msg_img"><img src="${image}" alt="sunil" id="imageId" width="40px" height="40px"></div>
+          <div class="received_msg">
+            <div class="received_withd_msg">
+              <p>${content}</p>
+              <span class="time_date"> ${date}</span></div>
+          </div>
+          </div>
+          `;
+    return message;
+  } else {
+    if (message_file.content_type === "audio/mpeg") {
+      let file_message = `
+            <div class="incoming_msg">
+            <div class="incoming_msg_img"><img src="${image}" alt="sunil" id="imageId" width="40px" height="40px"></div>
+            <div class="received_msg">
+                  <div class="received_withd_msg">
+                  <p>
+                  <audio controls style="width: 250px;">
+                  <source src="${message_file.file}" type="${message_file.content_type}">
+                  </p>
+                  <span class="time_date"></span> </div>
+            </div>
+            `;
+      return file_message;
+    } else if (message_file.content_type === "application/pdf") {
+      let file_message = `
+            <div class="incoming_msg">
+            <div class="incoming_msg_img"><img src="${image}" alt="sunil" id="imageId" width="40px" height="40px"></div>
+            <div class="received_msg">
+                  <div class="received_withd_msg">
+                  <p>
+                  <object data="${message_file.file}" width="250" height="200" type="${message_file.content_type}">
+                  </p>
+                  <span class="time_date"></span> </div>
+            </div>
+            </div>
+              `;
+      return file_message;
+    } else {
+      let file_message = `
+          <div class="incoming_msg">
+          <div class="incoming_msg_img"><img src="${image}" alt="sunil" id="imageId" width="40px" height="40px"></div>
+          <div class="received_msg">
+              <div class="received_withd_msg">
+                <p>
+                <img src="${message_file.file}" width="250" height="200" alt="image">
+                </p>
+                <span class="time_date"></span> </div>
+          </div>
+          </div>
+              `;
+      return file_message;
+    }
+  }
 }
 
 function chatListFunc(id, imageHref, imageSrc, title, lastMessageDate, lastMessage, countUnread, interlocutorsName,
@@ -104,8 +189,8 @@ function uploadImage() {
   let files = button[0].files;
 
   // Check file selected or not
-  if(files.length > 0 ){
-      fd.append('image',files[0]);
+  if (files.length > 0) {
+    fd.append('image', files[0]);
   }
 
   $.ajax({
@@ -115,11 +200,11 @@ function uploadImage() {
     processData: false,
     data: fd,
     success: function (data) {
-     console.log(data);
-     $('#userAvatar').attr("src", data.image);
+      console.log(data);
+      $('#userAvatar').attr("src", data.image);
     },
     error: function (data) {
-     console.log("error");
+      console.log("error");
     },
   })
 }
@@ -133,7 +218,7 @@ function chatAbout(image, name, profile, status, lastSeen) {
     <a href="javascript:void(0);" class="btn btn-outline-warning"><i class="fa fa-question"></i></a>
   </div>
   `;
-  let wrapperTop= `
+  let wrapperTop = `
    <div class="row">
   `;
   let wrapperBottom = `
@@ -168,7 +253,7 @@ function chatAbout(image, name, profile, status, lastSeen) {
   `;
     return wrapperTop + header + buttons + wrapperBottom
   }
-  if (status ===  "offline") {
+  if (status === "offline") {
     let header = `
           <div class="col-lg-6">
               <a href="${profile}" target="_blank">
@@ -211,7 +296,7 @@ function makeChatActive(e) {
 function chatListRender(data) {
   let chatList = data.results;
   $(".people-list").attr("data-href", data.next);
-  let ulStart = `<ul class="list-unstyled chat-list mt-2 mb-0">`;
+  let ulStart = `<ul id="chat-ul" class="list-unstyled chat-list mt-2 mb-0">`;
   let chats = ``;
   let ulEnd = `</ul>`;
   $.each(chatList, function (i) {
@@ -256,6 +341,7 @@ function getMessagesInChat(id, image, url = null) {
     type: "GET",
     success: function (data) {
       let message_list = data.results
+      console.log(message_list);
       $.each(message_list, function (i) {
         let messageDate = new Date();
         convertTZ(messageDate, "Europe/Kiev");
@@ -286,9 +372,9 @@ function getMessagesInChat(id, image, url = null) {
         let message = `<ul class="m-b-0">`;
         $('.chat-history').prepend(intermediateDate);
         if (message_list[i].author_id === currentUser[0]) {
-          message += outgoingMessage(message_list[i].content, message_list[i].date);
+          message += outgoingMessage(message_list[i].content, message_list[i].date, message_list[i].message_file);
         } else {
-          message += ingoingMessage(image, message_list[i].content, message_list[i].date);
+          message += ingoingMessage(image, message_list[i].content, message_list[i].date, message_list[i].message_file);
         }
         message += `</ul>`;
         $('.chat-history').prepend(message);

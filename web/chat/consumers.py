@@ -19,12 +19,6 @@ def parse_query_string(query_string):
 
 class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
 
-    @database_sync_to_async
-    def get_last_message_serializer(self):
-        queryset = models.Message.objects.all().order_by("-id")[:1]
-        serializer = serializers.MessageSerializer(instance=queryset, many=True)
-        return list(serializer.data)
-
     async def connect(self):
         self.user = self.scope['user']
         self.redis = settings.REDIS_DATABASE
@@ -137,10 +131,12 @@ class AsyncChatConsumer(AsyncJsonWebsocketConsumer):
         await self.check_message_db(data.get("message_id"))
 
     async def chat_message(self, event: dict):
-        data = event.get("data")
-        data_new = await self.get_last_message_serializer()
-        data.update(dict(data_new[0]))
-        await self.send_json(content=data)
+        if event['data']['data']['command'] == 'new_message':
+            date = datetime.fromisoformat(str(event['data']['data']['date'])).replace(tzinfo=None).replace(
+                microsecond=0)
+            date_time = datetime.strptime(str(date), "%Y-%m-%d %H:%M:%S")
+            event['data']['data']['date'] = str(date_time + pytz.timezone(settings.TIME_ZONE).utcoffset(date_time))
+        await self.send_json(content=event)
 
     async def file_message(self, event: dict):
         await self.send_json(content=event)

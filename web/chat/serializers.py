@@ -1,7 +1,7 @@
 import datetime
 import os
 from datetime import timedelta
-
+from .choices import FileType
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.contrib.auth import get_user_model
@@ -11,7 +11,7 @@ from django.conf import settings
 from main.models import UserData
 from main.services import MainService
 from main.utils import find_dict_in_list
-
+import time
 from . import models, services
 from .services import ChatService
 
@@ -143,12 +143,19 @@ class ChatSerializerCheck(serializers.ModelSerializer):
         fields = ("id", "name", "description", "status", "date", "file")
 
 
+class FileMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.FileMessage
+        fields = ("id", "message", "file", "filename", "content_type")
+
+
 class MessageListSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    message_file = FileMessageSerializer()
 
     class Meta:
         model = models.Message
-        fields = ("id", "has_read", "content", "date", "chat", "author_id")
+        fields = ("id", "has_read", "content", "date", "chat", "author_id", "message_file")
 
     # TODO: Продумать более хитрую валидацию, чтобы работало
     def validate(self, data):
@@ -198,7 +205,6 @@ class ChatShortInfoSerializer(serializers.Serializer):
     user_id = serializers.ListField(child=serializers.IntegerField())
 
     def create(self, validated_data):
-        print(validated_data)
         return ChatService.get_users_information(data=validated_data, request=self.context['request'])
 
 
@@ -209,19 +215,32 @@ class FileUploadSerializer(serializers.ModelSerializer):
         model = models.Chat
         fields = ['file']
 
-    # def validate(self, attrs):
-    #     limit = 4 * 1024 * 1024  # 4 mb
-    #     if attrs.get('image').size > limit:
-    #         raise serializers.ValidationError('File too large. Size should not exceed 4 MiB.')
-    #     return attrs
+    def validate(self, attrs):
+        limit = 100 * 1024 * 1024  # 100 mb
+        file_type = str(attrs.get('file')).rsplit(".", 1)[1]
+        tuple_elements = [a_tuple[0] for a_tuple in FileType.choices]
+        if file_type not in tuple_elements:
+            raise serializers.ValidationError('Wrong file format')
+        if attrs.get('file').size > limit:
+            raise serializers.ValidationError('File too large. Size should not exceed 100 MiB.')
+        return attrs
 
     def to_representation(self, instance):
-        return {'message': str(self.message.content), 'file_message': self.file_message.filename}
+        return {'message': str(self.message.id), 'file_message': self.file_message.filename}
 
     def save(self, **kwargs):
-        self.message = self.instance.messages.create(content='', author_id=1)  # TODO: NO HARDCODE
-        self.file_message = models.FileMessage.objects.create(message=self.message, file=self.validated_data['file'],
-                                                              filename="check", content_type="jpg")
+        file = self.validated_data['file']
+        file_type = str(self.validated_data.get('file')).rsplit(".", 1)[1]
+        filename = str(self.validated_data.get('file')).rsplit(".", 1)[0]
+        user_data = ChatService.get_or_set_user_jwt(self.context['request'].COOKIES.get(settings.JWT_COOKIE_NAME))
+        user = UserData(**user_data)
+        content_type = None
+        for value in FileType.choices:
+            if value[0] == file_type:
+                content_type = value[1]
+        self.message = models.Message.objects.create(author_id=user.id, chat=self.instance)
+        self.file_message = models.FileMessage.objects.create(message=self.message, file=file,
+                                                              filename=filename, content_type=content_type)
         request = self.context['request']
         async_to_sync(get_channel_layer().group_send)(
             str(self.instance.pk), {

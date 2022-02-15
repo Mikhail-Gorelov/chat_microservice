@@ -13,6 +13,6 @@ class AuthorStatus(IntegerChoices):
 
 
 class FileType(TextChoices):
-    PDF = ('.pdf', 'PDF')
-    JPEG = ('.jpg', 'JPEG')
-    MP3 = ('.mp3', 'MP3')
+    PDF = ('pdf', 'application/pdf')
+    JPEG = ('jpg', 'image/jpeg')
+    MP3 = ('mp3', 'audio/mpeg')

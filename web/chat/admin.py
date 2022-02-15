@@ -13,6 +13,11 @@ class MessageAdmin(admin.ModelAdmin):
     list_display = ('content', 'date')
 
 
+@admin.register(models.FileMessage)
+class FileMessageAdmin(admin.ModelAdmin):
+    list_display = ('message', 'filename')
+
+
 @admin.register(models.Chat)
 class ChatAdmin(admin.ModelAdmin):
     inlines = (UserChatInline,)

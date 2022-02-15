@@ -1,5 +1,5 @@
 from uuid import uuid4
-
+from django.contrib.postgres.indexes import *
 from django.db import models
 
 from chat.choices import AuthorStatus, ChatStatus, FileType
@@ -58,5 +58,5 @@ class FileMessage(models.Model):
         related_name='message_file'
     )
     file = models.ImageField(upload_to=file_upload_to)
-    filename = models.CharField(max_length=100)
-    content_type = models.CharField(max_length=10, choices=FileType.choices)
+    filename = models.CharField(max_length=100, db_index=True)
+    content_type = models.CharField(max_length=100, choices=FileType.choices)

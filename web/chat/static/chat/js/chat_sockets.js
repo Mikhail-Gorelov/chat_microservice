@@ -17,20 +17,45 @@ function closeChat(e) {
 }
 
 function messageFile(data) {
-  console.log(data);
-  let file_message = `
-        <div class="outgoing_msg">
-        <div class="sent_msg">
-            <p>
-            <audio controls>
-            <source src="${data.data.file}"" type="audio/mpeg">
-            <source src="${data.data.file}"" type="audio/ogg">
-            </p>
-            <span class="time_date"></span> </div>
-        </div>
-        `;
-  $('.chat-history').append(file_message);
-  $('.chat-history').scrollTop($('.chat-history').prop('scrollHeight'));
+  if (data.data.content_type === "audio/mpeg") {
+      let file_message = `
+            <div class="outgoing_msg">
+            <div class="sent_msg">
+                <p>
+                <audio controls>
+                <source src="${data.data.file}"" type="${data.data.content_type}">
+                </p>
+                <span class="time_date"></span> </div>
+            </div>
+            `;
+      $('.chat-history').append(file_message);
+      $('.chat-history').scrollTop($('.chat-history').prop('scrollHeight'));
+    } else if (data.data.content_type === "application/pdf") {
+      let file_message = `
+              <div class="outgoing_msg">
+              <div class="sent_msg">
+                  <p>
+                  <object data="${data.data.file}" width="500" height="400" type="${data.data.content_type}">
+                  </p>
+                  <span class="time_date"></span> </div>
+              </div>
+              `;
+        $('.chat-history').append(file_message);
+        $('.chat-history').scrollTop($('.chat-history').prop('scrollHeight'));
+  } else  {
+      let file_message = `
+              <div class="outgoing_msg">
+              <div class="sent_msg">
+                  <p>
+                  <img src="${data.data.file}" width="500" height="400" alt="image">
+                  </p>
+                  <span class="time_date"></span> </div>
+              </div>
+              `;
+        $('.chat-history').append(file_message);
+        $('.chat-history').scrollTop($('.chat-history').prop('scrollHeight'));
+  }
+
 }
 
 function messageInChat(e) {
@@ -43,61 +68,43 @@ function messageInChat(e) {
     messageFile(data);
   }
   if (data.command === "add_chat") {
-    console.log("added chat");
-    console.log(data);
     console.log(data.chat_id)
-    let chat = `
-    <div class="chat_list" id="${data.chat_id}">
-                  <li class="clearfix">
-                    <img src="" alt="avtr" width="10" height="40">
-                    <div class="about">
-                        <div class="name">Title</div>
-                        <div class="status"> Last Message Date </div>
-                        <div class="status"> Last Message
-                        <div class="status">
-                        <div class="icon-badge-container">
-                          <i class="far fa-envelope icon-badge-icon"></i>
-                          <div class="icon-badge" data="0">0</div>
-                        </div>
-                         <i class="fa fa-circle online"></i> online </div>
-                    </div>
-                  </li>
-                </div>
-    `;
-    let ulStart = `<ul class="list-unstyled chat-list mt-2 mb-0">`;
-    let ulEnd = `</ul>`;
-    ulStart += chat
-    ulStart += ulEnd
-    // TODO: добавляю в существующий ul
-    $('.people-list').append(ulStart);
-    $(".people-list").click(makeChatActive);
+    $('.people-list').append(
+      $("#chat-ul").append(
+      chatListFunc(
+        data.chat_id, "", "", "hello", "Today", "lalal", 0,
+        "mike",
+        "", "offline"))
+    );
+    $(".chat_list").click(makeChatActive);
   }
-  if (data.data.command === "new_message") {
-    $(`#${data.chat_id}`).find(".icon-badge").attr('data', data.count_unread);
-    $(`#${data.chat_id}`).find(".icon-badge").text("");
-    $(`#${data.chat_id}`).find(".icon-badge").text($(`#${data.chat_id}`).find(".icon-badge").attr('data'));
+  if (data.data.data.command === "new_message") {
+    // console.log("Hello!", data);
+    $(`#${data.data.chat_id}`).find(".icon-badge").attr('data', data.data.count_unread);
+    $(`#${data.data.chat_id}`).find(".icon-badge").text("");
+    $(`#${data.data.chat_id}`).find(".icon-badge").text($(`#${data.data.chat_id}`).find(".icon-badge").attr('data'));
     $('#chat-log').append(data.username + ": " + data.message + '\n');
     let currentUser = JSON.parse(localStorage.getItem('userData'));
-    let message_list = data
+    let message_list = data.data.data
     let message = '';
     if (message_list.author_id === currentUser[0]) {
-      message = outgoingMessage(message_list.content, message_list.date);
+      message = outgoingMessage(message_list.content, message_list.date, null);
     } else {
-      message = ingoingMessage(image, message_list.content, message_list.date);
+      message = ingoingMessage(image, message_list.content, message_list.date, null);
     }
     $('.chat-history').append(message);
     $('.chat-history').scrollTop($('.chat-history').prop('scrollHeight'));
   }
-  if (data.data.command === "check_message") {
-    let temp = Number($(`#${data.chat_id}`).find(".icon-badge").attr('data'));
+  if (data.data.data.command === "check_message") {
+    let temp = Number($(`#${data.data.chat_id}`).find(".icon-badge").attr('data'));
     if (temp === 0) {
-      $(`#${data.chat_id}`).find(".icon-badge").attr('data', 0);
-      $(`#${data.chat_id}`).find(".icon-badge").text("");
-      $(`#${data.chat_id}`).find(".icon-badge").text($(`#${data.chat_id}`).find(".icon-badge").attr('data'));
+      $(`#${data.data.chat_id}`).find(".icon-badge").attr('data', 0);
+      $(`#${data.data.chat_id}`).find(".icon-badge").text("");
+      $(`#${data.data.chat_id}`).find(".icon-badge").text($(`#${data.data.chat_id}`).find(".icon-badge").attr('data'));
     } else {
-      $(`#${data.chat_id}`).find(".icon-badge").attr('data', temp - 1);
-      $(`#${data.chat_id}`).find(".icon-badge").text("");
-      $(`#${data.chat_id}`).find(".icon-badge").text($(`#${data.chat_id}`).find(".icon-badge").attr('data'));
+      $(`#${data.data.chat_id}`).find(".icon-badge").attr('data', temp - 1);
+      $(`#${data.data.chat_id}`).find(".icon-badge").text("");
+      $(`#${data.data.chat_id}`).find(".icon-badge").text($(`#${data.data.chat_id}`).find(".icon-badge").attr('data'));
     }
   }
 }
