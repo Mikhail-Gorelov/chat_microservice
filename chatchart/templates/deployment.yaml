@@ -38,15 +38,86 @@ spec:
               containerPort: 80
               protocol: TCP
           livenessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 5
             httpGet:
-              path: /
+              path: {{ .Values.chat.healthCheckUrl }}
               port: http
           readinessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 5
             httpGet:
-              path: /
+              path: {{ .Values.chat.healthCheckUrl }}
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: SUPERUSER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: blogchart-secrets
+                  key: superUserEmail
+                  optional: false
+            - name: SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: blogchart-secrets
+                  key: superUserPassword
+                  optional: false
+            - name: ENABLE_RENDERING
+              value: {{ .Values.chat.enableRendering | quote }}
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: blogchart-secrets
+                  key: secretKey
+                  optional: false
+            - name: DJANGO_ALLOWED_HOSTS
+              value: {{ required "chat allowed hosts is required" .Values.chat.allowedHosts | quote }}
+            - name: POSTGRES_HOST
+              value: {{ default (printf "%s-postgresql" .Release.Name) .Values.postgresql.host | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.chat.db.postgresPort | quote }}
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: blogchart-secrets
+                  key: postgresqlDatabase
+                  optional: false
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: blogchart-secrets
+                  key: username
+                  optional: false
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: blogchart-secrets
+                  key: postgresqlPassword
+                  optional: false
+            - name: REDIS_HOST
+              value: {{ default (printf "%s-redis-master" .Release.Name) .Values.chat.redis.host | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.chat.redis.redisPort | quote }}
+            - name: REDIS_URL
+              value: "redis://$(REDIS_HOST):$(REDIS_PORT)"
+            - name: REDIS_DB
+              value: {{ .Values.chat.redis.redisDB | quote }}
+            - name: DEBUG
+              value: {{ .Values.chat.debug | quote }}
+            - name: SITE_ID
+              value: {{ .Values.chat.siteId | quote }}
+            - name: SQL_ENGINE
+              value: {{ .Values.chat.sqlEngine | quote }}
+            - name: BACKEND_SITE
+              value: {{ .Values.chat.backendSite| quote }}
+            - name: ADMIN_URL
+              value: {{ .Values.chat.adminUrl | quote }}
+            - name: DJANGO_SETTINGS_MODULE
+              value: {{ .Values.chat.djangoSettingsModule | quote }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

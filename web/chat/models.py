@@ -1,5 +1,5 @@
 from uuid import uuid4
-from django.contrib.postgres.indexes import *
+# from django.contrib.postgres.indexes import *
 from django.db import models
 
 from chat.choices import AuthorStatus, ChatStatus, FileType
