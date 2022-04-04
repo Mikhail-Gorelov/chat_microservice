@@ -57,13 +57,13 @@ spec:
             - name: SUPERUSER_EMAIL
               valueFrom:
                 secretKeyRef:
-                  name: blogchart-secrets
+                  name: chatchart-secrets
                   key: superUserEmail
                   optional: false
             - name: SUPERUSER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: blogchart-secrets
+                  name: chatchart-secrets
                   key: superUserPassword
                   optional: false
             - name: ENABLE_RENDERING
@@ -71,7 +71,7 @@ spec:
             - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: blogchart-secrets
+                  name: chatchart-secrets
                   key: secretKey
                   optional: false
             - name: DJANGO_ALLOWED_HOSTS
@@ -81,25 +81,13 @@ spec:
             - name: POSTGRES_PORT
               value: {{ .Values.chat.db.postgresPort | quote }}
             - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: blogchart-secrets
-                  key: postgresqlDatabase
-                  optional: false
+              value: {{ .Values.postgresql.postgresDatabase | quote }}
             - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: blogchart-secrets
-                  key: username
-                  optional: false
+              value: {{ .Values.postgresql.username | quote }}
             - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: blogchart-secrets
-                  key: postgresqlPassword
-                  optional: false
+              value: {{ .Values.postgresql.postgresPassword | quote }}
             - name: REDIS_HOST
-              value: {{ default (printf "%s-redis-master" .Release.Name) .Values.chat.redis.host | quote }}
+              value: {{ default (printf "%s-redis-master" .Release.Name) .Values.redis.host | quote }}
             - name: REDIS_PORT
               value: {{ .Values.chat.redis.redisPort | quote }}
             - name: REDIS_URL

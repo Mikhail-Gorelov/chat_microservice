@@ -1,28 +1,6 @@
 version: '3.7'
 
 services:
-  nginx:
-    build:
-      context: .
-      cache_from:
-        - mushroom3/django-chat-nginx:${DOCKER_TAG:-latest}
-      dockerfile: docker/prod/nginx/Dockerfile
-    image: mushroom3/django-chat-nginx:${DOCKER_TAG:-latest}
-    volumes:
-      - static_volume:/home/ubuntu/web/static
-      - media_volume:/home/ubuntu/web/media
-      - gunicorn_socket:/gunicorn_socket
-    depends_on: [chat]
-    restart: always
-    healthcheck:
-      test: service nginx status || exit 1
-      interval: 20s
-      timeout: 3s
-      retries: 3
-    networks:
-      - microservice_network
-    extra_hosts:
-      - "docker-gateway-host:172.17.0.1"
   chat:
     build:
       context: .
@@ -30,16 +8,12 @@ services:
         - mushroom3/django-chat:${DOCKER_TAG:-latest}
       dockerfile: docker/prod/web/Dockerfile
     image: mushroom3/django-chat:${DOCKER_TAG:-latest}
-    entrypoint: /entrypoint.sh
     volumes:
-      - static_volume:/home/ubuntu/web/static
-      - media_volume:/home/ubuntu/web/media
       - redis_socket:/redis_socket
-      - gunicorn_socket:/gunicorn_socket
       - postgres_socket:/postgres_socket
       - ./logs/django:/home/ubuntu/web/logs:delegated
     expose:
-      - 8000
+      - 9000
     environment:
       - USE_HTTPS=0
     env_file:
@@ -65,6 +39,7 @@ services:
       cache_from:
         - mushroom3/django-chat:${DOCKER_TAG:-latest}
       dockerfile: docker/prod/web/Dockerfile
+    entrypoint: ""
     image: mushroom3/django-chat:${DOCKER_TAG:-latest}
     command: celery -A src worker -l info
     env_file:
@@ -122,10 +97,7 @@ volumes:
   postgres_data:
   redis_data:
   redis_socket:
-  gunicorn_socket:
   postgres_socket:
-  static_volume:
-  media_volume:
 
 networks:
   microservice_network:

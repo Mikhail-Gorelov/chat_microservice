@@ -31,7 +31,3 @@ dependencies:
     version: 16.3.0
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled, global.redis.enabled
-  - name: nginx
-    version: 9.7.3
-    repository: https://charts.bitnami.com/bitnami
-    condition: nginx.enabled, global.nginx.enabled

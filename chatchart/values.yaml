@@ -38,7 +38,7 @@ securityContext: {}
 
 service:
   type: LoadBalancer
-  port: 8010
+  port: 10000
 
 ingress:
   enabled: true
@@ -83,6 +83,9 @@ affinity: {}
 
 postgresql:
   enabled: true
+  postgresDatabase: "develop"
+  postgresPassword: "dev"
+  username: "develop"
 
 redis:
   auth:
@@ -95,7 +98,7 @@ chat:
   debug: "0"
   siteId: "1"
   sqlEngine: "django.db.backends.postgresql"
-  backendSite: "http://localhost:8010"
+  backendSite: "http://localhost:10000"
   adminUrl: "admin"
   djangoSettingsModule: "src.settings_dev"
   db:
