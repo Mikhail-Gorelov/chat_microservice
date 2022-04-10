@@ -1,10 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "chatchart.fullname" . }}
   labels:
     {{- include "chatchart.labels" . | nindent 4 }}
 spec:
+  serviceName: {{ include "chatchart.fullname" . }}
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
@@ -35,7 +36,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8000
               protocol: TCP
           livenessProbe:
             initialDelaySeconds: 30
@@ -81,11 +82,11 @@ spec:
             - name: POSTGRES_PORT
               value: {{ .Values.chat.db.postgresPort | quote }}
             - name: POSTGRES_DB
-              value: {{ .Values.postgresql.postgresDatabase | quote }}
+              value: {{ .Values.postgresql.auth.database  | quote }}
             - name: POSTGRES_USER
-              value: {{ .Values.postgresql.username | quote }}
+              value: {{ .Values.postgresql.auth.username | quote }}
             - name: POSTGRES_PASSWORD
-              value: {{ .Values.postgresql.postgresPassword | quote }}
+              value: {{ .Values.postgresql.auth.password | quote }}
             - name: REDIS_HOST
               value: {{ default (printf "%s-redis-master" .Release.Name) .Values.redis.host | quote }}
             - name: REDIS_PORT
@@ -106,6 +107,97 @@ spec:
               value: {{ .Values.chat.adminUrl | quote }}
             - name: DJANGO_SETTINGS_MODULE
               value: {{ .Values.chat.djangoSettingsModule | quote }}
+          volumeMounts:
+            - name: {{ (printf "%s-media-storage" .Release.Name) }}
+              mountPath: /web/media
+        - name: {{ .Values.celeryContainerName }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: chatchart-secrets
+                  key: secretKey
+                  optional: false
+            - name: POSTGRES_HOST
+              value: {{ default (printf "%s-postgresql" .Release.Name) .Values.postgresql.host | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.chat.db.postgresPort | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresql.auth.database  | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.postgresql.auth.username | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgresql.auth.password | quote }}
+            - name: REDIS_HOST
+              value: {{ default (printf "%s-redis-master" .Release.Name) .Values.redis.host | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.chat.redis.redisPort | quote }}
+            - name: REDIS_URL
+              value: "redis://$(REDIS_HOST):$(REDIS_PORT)"
+            - name: REDIS_DB
+              value: {{ .Values.chat.redis.redisDB | quote }}
+            - name: CELERY_BROKER_URL
+              value: "redis://$(REDIS_HOST):$(REDIS_PORT)/3"
+            - name: CELERY_RESULT_BACKEND
+              value: "redis://$(REDIS_HOST):$(REDIS_PORT)/3"
+            - name: EMAIL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: email-secrets
+                  key: emailHost
+                  optional: false
+            - name: EMAIL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: email-secrets
+                  key: emailPort
+                  optional: false
+            - name: EMAIL_USE_TLS
+              valueFrom:
+                secretKeyRef:
+                  name: email-secrets
+                  key: emailUseTLS
+                  optional: false
+            - name: EMAIL_USE_SSL
+              valueFrom:
+                secretKeyRef:
+                  name: email-secrets
+                  key: emailUseSSL
+                  optional: false
+            - name: DEFAULT_FROM_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: email-secrets
+                  key: defaultFromEmail
+                  optional: false
+            - name: EMAIL_HOST_USER
+              valueFrom:
+                secretKeyRef:
+                  name: email-secrets
+                  key: emailHostUser
+                  optional: false
+            - name: EMAIL_HOST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: email-secrets
+                  key: emailHostPassword
+                  optional: false
+            - name: EMAIL_BACKEND
+              valueFrom:
+                secretKeyRef:
+                  name: email-secrets
+                  key: emailBackend
+                  optional: false
+      volumes:
+        - name: {{ (printf "%s-media-storage" .Release.Name) }}
+          persistentVolumeClaim:
+            claimName: {{ include "chatchart.fullname" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

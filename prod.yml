@@ -13,7 +13,7 @@ services:
       - postgres_socket:/postgres_socket
       - ./logs/django:/home/ubuntu/web/logs:delegated
     expose:
-      - 9000
+      - 8000
     environment:
       - USE_HTTPS=0
     env_file:
