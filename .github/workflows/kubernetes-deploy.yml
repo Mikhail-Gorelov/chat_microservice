@@ -13,7 +13,6 @@ jobs:
       - name: Get project
         uses: actions/checkout@v2
       - run: |
-          echo kubectl version --client
           cd chatchart
           echo "${{ secrets.KUBECONFIG }}" >> config
           export KUBECONFIG=config
