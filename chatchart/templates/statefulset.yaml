@@ -88,13 +88,17 @@ spec:
             - name: POSTGRES_PASSWORD
               value: {{ .Values.postgresql.auth.password | quote }}
             - name: REDIS_HOST
-              value: {{ default (printf "%s-redis-master" .Release.Name) .Values.redis.host | quote }}
+              value: "redis-master"
             - name: REDIS_PORT
               value: {{ .Values.chat.redis.redisPort | quote }}
             - name: REDIS_URL
               value: "redis://$(REDIS_HOST):$(REDIS_PORT)"
             - name: REDIS_DB
               value: {{ .Values.chat.redis.redisDB | quote }}
+            - name: CELERY_BROKER_URL
+              value: "$(REDIS_URL)/7"
+            - name: CELERY_RESULT_BACKEND
+              value: "$(REDIS_URL)/7"
             - name: DEBUG
               value: {{ .Values.chat.debug | quote }}
             - name: SITE_ID
@@ -117,6 +121,12 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          args:
+          {{- range .Values.celery.args}}
+            - {{ . | toYaml | indent 4 | trim }}
+          {{- end }}
+          command:
+            - ""
           env:
             - name: SECRET_KEY
               valueFrom:
@@ -135,7 +145,7 @@ spec:
             - name: POSTGRES_PASSWORD
               value: {{ .Values.postgresql.auth.password | quote }}
             - name: REDIS_HOST
-              value: {{ default (printf "%s-redis-master" .Release.Name) .Values.redis.host | quote }}
+              value: "redis-master"
             - name: REDIS_PORT
               value: {{ .Values.chat.redis.redisPort | quote }}
             - name: REDIS_URL
@@ -143,55 +153,55 @@ spec:
             - name: REDIS_DB
               value: {{ .Values.chat.redis.redisDB | quote }}
             - name: CELERY_BROKER_URL
-              value: "redis://$(REDIS_HOST):$(REDIS_PORT)/3"
+              value: "$(REDIS_URL)/7"
             - name: CELERY_RESULT_BACKEND
-              value: "redis://$(REDIS_HOST):$(REDIS_PORT)/3"
+              value: "$(REDIS_URL)/7"
             - name: EMAIL_HOST
               valueFrom:
                 secretKeyRef:
-                  name: email-secrets
+                  name: email-secrets-chat
                   key: emailHost
                   optional: false
             - name: EMAIL_PORT
               valueFrom:
                 secretKeyRef:
-                  name: email-secrets
+                  name: email-secrets-chat
                   key: emailPort
                   optional: false
             - name: EMAIL_USE_TLS
               valueFrom:
                 secretKeyRef:
-                  name: email-secrets
+                  name: email-secrets-chat
                   key: emailUseTLS
                   optional: false
             - name: EMAIL_USE_SSL
               valueFrom:
                 secretKeyRef:
-                  name: email-secrets
+                  name: email-secrets-chat
                   key: emailUseSSL
                   optional: false
             - name: DEFAULT_FROM_EMAIL
               valueFrom:
                 secretKeyRef:
-                  name: email-secrets
+                  name: email-secrets-chat
                   key: defaultFromEmail
                   optional: false
             - name: EMAIL_HOST_USER
               valueFrom:
                 secretKeyRef:
-                  name: email-secrets
+                  name: email-secrets-chat
                   key: emailHostUser
                   optional: false
             - name: EMAIL_HOST_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: email-secrets
+                  name: email-secrets-chat
                   key: emailHostPassword
                   optional: false
             - name: EMAIL_BACKEND
               valueFrom:
                 secretKeyRef:
-                  name: email-secrets
+                  name: email-secrets-chat
                   key: emailBackend
                   optional: false
       volumes:
