@@ -1,0 +1,22 @@
+name: Kubernetes Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy-kubernetes:
+    runs-on: ubuntu-latest
+    container: dtzar/helm-kubectl:3.7.1
+    steps:
+      - name: Get project
+        uses: actions/checkout@v2
+      - run: |
+          cd chatchart
+          echo "${{ secrets.KUBECONFIG }}" >> config
+          export KUBECONFIG=config
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
+          helm dep build
+          helm upgrade --install chatchart . --namespace redis

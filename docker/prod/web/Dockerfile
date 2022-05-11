@@ -20,7 +20,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     TZ=Europe/Kiev \
     LANG=C.UTF-8 \
-    APP_HOME=/home/ubuntu/web
+    APP_HOME=/web
 
 ARG GID=1000
 ARG UID=1000
@@ -28,7 +28,7 @@ ARG USER=ubuntu
 
 
 RUN apk update && \
-    apk add --no-cache postgresql-dev  \
+    apk add --no-cache postgresql-dev nginx \
     jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev tiff-dev tk-dev tcl-dev harfbuzz-dev fribidi-dev curl && \
     addgroup -g $GID -S $USER && \
     adduser -S $USER -G $USER --disabled-password --uid "$UID" && \
@@ -41,10 +41,15 @@ WORKDIR $APP_HOME
 COPY --from=builder /install /usr/local
 COPY --chown=$USER:$USER ./docker/prod/web/entrypoints /
 COPY --chown=$USER:$USER ./web $APP_HOME
+COPY ./docker/prod/nginx/conf.d /etc/nginx/conf.d
+COPY ./docker/prod/nginx/nginx.conf /etc/nginx/nginx.conf
 
 RUN chmod +x /*.sh && \
     mkdir -p static logs  && \
     chown -R $USER:$USER static logs  && \
+    touch /var/run/nginx.pid && \
+    chown -R $USER:$USER /etc/nginx /var/lib/nginx/ /var/log /var/run/nginx.pid && \
     flake8 .
+ENTRYPOINT ["/entrypoint.sh"]
 
 USER $USER
