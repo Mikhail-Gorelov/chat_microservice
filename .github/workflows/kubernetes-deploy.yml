@@ -2,7 +2,7 @@ name: Kubernetes Deploy
 
 on:
   push:
-    branches: [ add_kubernetes ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,6 @@ jobs:
           cd chatchart
           echo "${{ secrets.KUBECONFIG }}" >> config
           export KUBECONFIG=config
-          kubectl get pods --namespace=redis
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
           helm dep build
